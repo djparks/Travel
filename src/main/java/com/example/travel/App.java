@@ -11,7 +11,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.scene.control.ScrollPane;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -37,35 +40,64 @@ public class App extends Application {
         table = new TableView<>();
         records = FXCollections.observableArrayList();
         table.setItems(records);
+        
+        // Configure table properties
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        table.setMinWidth(800);
 
-        // Create columns
+        // Create ScrollPane to handle horizontal scrolling
+        ScrollPane scrollPane = new ScrollPane(table);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        
+        // Create a VBox to hold the ScrollPane and allow it to grow
+        VBox tableContainer = new VBox(scrollPane);
+        VBox.setVgrow(tableContainer, Priority.ALWAYS);
+        tableContainer.setFillWidth(true);
+
+        // Create columns with fixed widths
         TableColumn<TravelRecord, String> descCol = new TableColumn<>("Description");
         descCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        descCol.setPrefWidth(150);
+        descCol.setPrefWidth(250);
+        descCol.setMinWidth(250);
+        descCol.setResizable(true);
 
         TableColumn<TravelRecord, String> urlCol = new TableColumn<>("URL");
         urlCol.setCellValueFactory(new PropertyValueFactory<>("url"));
-        urlCol.setPrefWidth(200);
+        urlCol.setPrefWidth(300);
+        urlCol.setMinWidth(300);
+        urlCol.setResizable(true);
 
         TableColumn<TravelRecord, String> stateCol = new TableColumn<>("State");
         stateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
         stateCol.setPrefWidth(100);
+        stateCol.setMinWidth(100);
+        stateCol.setResizable(true);
 
         TableColumn<TravelRecord, String> cityCol = new TableColumn<>("City");
         cityCol.setCellValueFactory(new PropertyValueFactory<>("city"));
-        cityCol.setPrefWidth(100);
+        cityCol.setPrefWidth(150);
+        cityCol.setMinWidth(150);
+        cityCol.setResizable(true);
 
         TableColumn<TravelRecord, String> addressCol = new TableColumn<>("Address");
         addressCol.setCellValueFactory(new PropertyValueFactory<>("address"));
-        addressCol.setPrefWidth(150);
+        addressCol.setPrefWidth(250);
+        addressCol.setMinWidth(250);
+        addressCol.setResizable(true);
 
         TableColumn<TravelRecord, String> zipCol = new TableColumn<>("ZIP");
         zipCol.setCellValueFactory(new PropertyValueFactory<>("zip"));
-        zipCol.setPrefWidth(80);
+        zipCol.setPrefWidth(100);
+        zipCol.setMinWidth(100);
+        zipCol.setResizable(true);
 
         TableColumn<TravelRecord, String> geoCol = new TableColumn<>("Geo");
         geoCol.setCellValueFactory(new PropertyValueFactory<>("geo"));
-        geoCol.setPrefWidth(100);
+        geoCol.setPrefWidth(200);
+        geoCol.setMinWidth(200);
+        geoCol.setResizable(true);
 
         table.getColumns().add(descCol);
         table.getColumns().add(urlCol);
@@ -85,10 +117,14 @@ public class App extends Application {
         buttonBox.getChildren().add(addButton);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
 
-        root.setCenter(table);
+        root.setCenter(tableContainer);
         root.setBottom(buttonBox);
 
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1024, 768);
+        
+        // Make the window responsive
+        stage.setMinWidth(800);
+        stage.setMinHeight(600);
         stage.setScene(scene);
         stage.setTitle("Travel Records");
         stage.show();
