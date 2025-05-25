@@ -17,6 +17,7 @@ public class TravelRecord {
     private String city;
     private String address;
     private String zip;
+    private String geo;
     private String pictures;
     private String notes;
     private LocalDateTime dateCreated;
@@ -32,7 +33,7 @@ public class TravelRecord {
         if (this.id == null) {
             // Create new record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, pictures, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, geo, pictures, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -40,10 +41,11 @@ public class TravelRecord {
                     stmt.setString(4, city);
                     stmt.setString(5, address);
                     stmt.setString(6, zip);
-                    stmt.setString(7, pictures);
-                    stmt.setString(8, notes);
-                    stmt.setTimestamp(9, Timestamp.valueOf(dateCreated));
-                    stmt.setTimestamp(10, Timestamp.valueOf(dateUpdated));
+                    stmt.setString(7, geo);
+                    stmt.setString(8, pictures);
+                    stmt.setString(9, notes);
+                    stmt.setTimestamp(10, Timestamp.valueOf(dateCreated));
+                    stmt.setTimestamp(11, Timestamp.valueOf(dateUpdated));
                     stmt.executeUpdate();
 
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -56,12 +58,17 @@ public class TravelRecord {
         } else {
             // Update existing record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "UPDATE travel_records SET description=?, url=?, state=?, city=?, address=?, zip=?, pictures=?, notes=?, date_updated=? WHERE id=?";
+                String sql = "UPDATE travel_records SET description=?, url=?, state=?, city=?, address=?, zip=?, geo=?, pictures=?, notes=?, date_updated=? WHERE id=?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, description);
-                    stmt.setString(2, state);
-                    stmt.setString(3, city);
-                    stmt.setString(4, address);
+                    stmt.setString(2, url);
+                    stmt.setString(3, state);
+                    stmt.setString(4, city);
+                    stmt.setString(5, address);
+                    stmt.setString(6, zip);
+                    stmt.setString(7, geo);
+                    stmt.setString(8, pictures);
+                    stmt.setString(9, notes);
                     stmt.setString(5, zip);
                     stmt.setString(6, pictures);
                     stmt.setString(7, notes);
@@ -121,6 +128,7 @@ public class TravelRecord {
         record.setDescription(rs.getString("description"));
         record.setUrl(rs.getString("url"));
         record.setState(rs.getString("state"));
+        record.setGeo(rs.getString("geo"));
         record.setCity(rs.getString("city"));
         record.setAddress(rs.getString("address"));
         record.setZip(rs.getString("zip"));
@@ -202,6 +210,14 @@ public class TravelRecord {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getGeo() {
+        return geo;
+    }
+
+    public void setGeo(String geo) {
+        this.geo = geo;
     }
 
     public LocalDateTime getDateCreated() {

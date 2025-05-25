@@ -63,12 +63,17 @@ public class App extends Application {
         zipCol.setCellValueFactory(new PropertyValueFactory<>("zip"));
         zipCol.setPrefWidth(80);
 
+        TableColumn<TravelRecord, String> geoCol = new TableColumn<>("Geo");
+        geoCol.setCellValueFactory(new PropertyValueFactory<>("geo"));
+        geoCol.setPrefWidth(100);
+
         table.getColumns().add(descCol);
         table.getColumns().add(urlCol);
         table.getColumns().add(stateCol);
         table.getColumns().add(cityCol);
         table.getColumns().add(addressCol);
         table.getColumns().add(zipCol);
+        table.getColumns().add(geoCol);
         table.getSortOrder().add(descCol); // Default sort by description
 
         // Add button

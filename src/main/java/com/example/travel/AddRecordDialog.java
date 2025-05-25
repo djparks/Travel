@@ -16,6 +16,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField cityField = new TextField();
     private final TextField addressField = new TextField();
     private final TextField zipField = new TextField();
+    private final TextField geoField = new TextField();
     private final TextArea picturesField = new TextArea();
     private final TextArea notesField = new TextArea();
 
@@ -51,6 +52,9 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("ZIP:"), 0, 4);
         grid.add(zipField, 1, 4);
         
+        grid.add(new Label("Geo:"), 2, 4);
+        grid.add(geoField, 3, 4);
+        
         grid.add(new Label("Pictures:"), 0, 5);
         picturesField.setPrefRowCount(2);
         grid.add(picturesField, 1, 5);
@@ -82,6 +86,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
                 record.setCity(cityField.getText());
                 record.setAddress(addressField.getText());
                 record.setZip(zipField.getText());
+                record.setGeo(geoField.getText());
                 record.setPictures(picturesField.getText());
                 record.setNotes(notesField.getText());
                 return record;
