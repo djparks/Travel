@@ -293,33 +293,25 @@ public class App extends Application {
 
     private void initDatabase() {
         try {
-            // Drop existing table if exists
-            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                Statement dropStmt = conn.createStatement();
-                dropStmt.execute("DROP TABLE IF EXISTS travel_records");
-            }
-
             // Create new table with proper BLOB column
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             Statement stmt = connection.createStatement();
             
-            // Create travel records table
-            stmt.execute("""
-                CREATE TABLE IF NOT EXISTS travel_records (
-                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                    description VARCHAR(255) NOT NULL UNIQUE,
-                    url VARCHAR(1024),
-                    state VARCHAR(255),
-                    city VARCHAR(255),
-                    address VARCHAR(255),
-                    zip VARCHAR(10),
-                    geo VARCHAR(255),
-                    picture BLOB,
-                    notes TEXT,
-                    date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    date_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                )
-            """);
+            // Create travel records table if it doesn't exist
+            stmt.execute("CREATE TABLE IF NOT EXISTS travel_records ("
+                + "id BIGINT PRIMARY KEY AUTO_INCREMENT,"
+                + "description VARCHAR(255) UNIQUE NOT NULL,"
+                + "url VARCHAR(1024),"
+                + "state VARCHAR(255),"
+                + "city VARCHAR(255),"
+                + "address VARCHAR(255),"
+                + "zip VARCHAR(10),"
+                + "geo VARCHAR(255),"
+                + "picture BLOB,"
+                + "notes TEXT,"
+                + "date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                + "date_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
+                + ")");
             
             stmt.close();
         } catch (Exception e) {
