@@ -22,7 +22,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.stream.Collectors;
 import com.example.travel.util.XmlUtils;
+import com.example.travel.model.State;
+import com.example.travel.model.TravelRecord;
 
 public class App extends Application {
 
@@ -176,6 +179,26 @@ public class App extends Application {
         table.getColumns().add(geoCol);
         table.getSortOrder().add(descCol); // Default sort by description
 
+        // Filter fields
+        TextField descriptionFilter = new TextField();
+        descriptionFilter.setPromptText("Filter by description...");
+        ComboBox<State> stateFilter = new ComboBox<>();
+        stateFilter.setPromptText("Filter by state...");
+        stateFilter.getItems().addAll(State.values());
+        stateFilter.getItems().add(0, null); // Add null option for "All states"
+        
+        // Add filter listeners
+        descriptionFilter.textProperty().addListener((obs, oldVal, newVal) -> applyFilters(descriptionFilter, stateFilter));
+        stateFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters(descriptionFilter, stateFilter));
+        
+        HBox filterBox = new HBox(10);
+        filterBox.getChildren().addAll(
+            new Label("Description:"), descriptionFilter,
+            new Label("State:"), stateFilter
+        );
+        filterBox.setAlignment(Pos.CENTER_LEFT);
+        filterBox.setPadding(new Insets(0, 0, 10, 0));
+
         // Add button
         Button addButton = new Button("Add New Record");
         addButton.setOnAction(e -> showAddDialog(stage));
@@ -201,7 +224,7 @@ public class App extends Application {
                     if (response == ButtonType.OK) {
                         try {
                             selectedRecord.delete();
-                            refreshTableData();
+                            applyFilters(descriptionFilter, stateFilter); // Refresh with filters
                         } catch (SQLException ex) {
                             ex.printStackTrace();
                             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -216,11 +239,14 @@ public class App extends Application {
         });
 
         HBox buttonBox = new HBox(10);
-        buttonBox.setAlignment(Pos.CENTER_RIGHT);
-        buttonBox.getChildren().addAll(deleteButton, addButton);
+        buttonBox.setAlignment(Pos.CENTER_LEFT);
+        buttonBox.getChildren().addAll(addButton, deleteButton);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
 
-        root.setCenter(tableContainer);
+        VBox centerBox = new VBox(10);
+        centerBox.getChildren().addAll(filterBox, tableContainer);
+        
+        root.setCenter(centerBox);
         root.setBottom(buttonBox);
 
         Scene scene = new Scene(root, 1024, 768);
@@ -287,6 +313,33 @@ public class App extends Application {
         });
     }
 
+    private void applyFilters(TextField descriptionFilter, ComboBox<State> stateFilter) {
+        String descriptionText = descriptionFilter.getText().toLowerCase().trim();
+        State selectedState = stateFilter.getValue();
+        
+        try {
+            List<TravelRecord> allRecords = TravelRecord.findAll();
+            List<TravelRecord> filteredRecords = allRecords.stream()
+                .filter(record -> 
+                    (descriptionText.isEmpty() || 
+                     record.getDescription().toLowerCase().contains(descriptionText)) &&
+                    (selectedState == null || 
+                     (record.getState() != null && 
+                      record.getState().equals(selectedState.name())))
+                )
+                .collect(Collectors.toList());
+            
+            table.setItems(FXCollections.observableArrayList(filteredRecords));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Could not load records");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
+    
     private void refreshTableData() {
         try {
             records.clear();
