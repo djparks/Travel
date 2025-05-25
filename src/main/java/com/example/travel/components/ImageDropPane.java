@@ -16,10 +16,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.function.Consumer;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
 public class ImageDropPane extends VBox {
     private final ImageView imageView;
     private final Label promptLabel;
-    private byte[] imageData;
+    private final ObjectProperty<byte[]> imageData = new SimpleObjectProperty<>();
     private Consumer<byte[]> onImageChanged;
 
     public ImageDropPane() {
@@ -86,7 +89,7 @@ public class ImageDropPane extends VBox {
     }
 
     public void setImageData(byte[] data) {
-        this.imageData = data;
+        this.imageData.set(data);
         if (data != null && data.length > 0) {
             Image image = new Image(new ByteArrayInputStream(data));
             imageView.setImage(image);
@@ -101,6 +104,10 @@ public class ImageDropPane extends VBox {
     }
 
     public byte[] getImageData() {
+        return imageData.get();
+    }
+
+    public ObjectProperty<byte[]> imageDataProperty() {
         return imageData;
     }
 

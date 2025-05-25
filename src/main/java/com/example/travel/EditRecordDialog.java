@@ -4,6 +4,7 @@ import com.example.travel.model.State;
 import com.example.travel.model.TravelRecord;
 import javafx.geometry.Insets;
 import javafx.stage.Modality;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -21,6 +22,9 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
     private final ImageDropPane imageDropPane = new ImageDropPane();
     private final TravelRecord record;  // Used to initialize dialog fields and for validation
 
+    private boolean hasChanges = false;
+    private final ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+
     public EditRecordDialog(Stage owner, TravelRecord record) {
         this.record = record;
         setTitle("Edit Travel Record");
@@ -36,19 +40,37 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
 
         // Initialize fields with record data
         descriptionField.setText(record.getDescription());
-        grid.add(urlField, 1, 1);
         urlField.setText(record.getUrl());
+        cityField.setText(record.getCity());
+        addressField.setText(record.getAddress());
+        zipField.setText(record.getZip());
+        geoField.setText(record.getGeo());
+        notesArea.setText(record.getNotes());
+        imageDropPane.setImageData(record.getPicture());
 
-        grid.add(new Label("State:"), 0, 2);
-        grid.add(stateComboBox, 1, 2);
+        // Initialize state combobox
         stateComboBox.getItems().addAll(State.values());
-        if (record.getState() != null) {
+        if (record.getState() != null && !record.getState().isEmpty()) {
             try {
                 stateComboBox.setValue(State.valueOf(record.getState()));
             } catch (IllegalArgumentException e) {
                 // Invalid state value in record, leave combobox empty
             }
         }
+
+        // Add change listeners to all fields
+        descriptionField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        urlField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        stateComboBox.valueProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        cityField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        addressField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        zipField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        geoField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        notesArea.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        imageDropPane.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+
+        grid.add(new Label("State:"), 0, 2);
+        grid.add(stateComboBox, 1, 2);
 
         grid.add(new Label("City:"), 0, 3);
         grid.add(cityField, 1, 3);
@@ -78,31 +100,33 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         getDialogPane().setContent(grid);
 
         // Add buttons
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-        // Enable/Disable save button depending on whether description is empty
-        Button saveButton = (Button) getDialogPane().lookupButton(saveButtonType);
-        saveButton.setDisable(true);
-
-        descriptionField.textProperty().addListener((observable, oldValue, newValue) -> 
-            saveButton.setDisable(newValue.trim().isEmpty()));
+        // Get the save button
+        Node saveButton = getDialogPane().lookupButton(saveButtonType);
+        saveButton.setDisable(true); // Initially disabled until changes are made
 
         // Convert the result to TravelRecord object when save is clicked
         setResultConverter(dialogButton -> {
-            if (dialogButton == saveButtonType) {
-                record.setDescription(descriptionField.getText().trim());
-                record.setUrl(urlField.getText().trim());
+            if (dialogButton == saveButtonType && hasChanges) {
+                record.setDescription(descriptionField.getText());
+                record.setUrl(urlField.getText());
                 record.setState(stateComboBox.getValue() != null ? stateComboBox.getValue().name() : null);
-                record.setCity(cityField.getText().trim());
-                record.setAddress(addressField.getText().trim());
-                record.setZip(zipField.getText().trim());
-                record.setGeo(geoField.getText().trim());
+                record.setCity(cityField.getText());
+                record.setAddress(addressField.getText());
+                record.setZip(zipField.getText());
+                record.setGeo(geoField.getText());
+                record.setNotes(notesArea.getText());
                 record.setPicture(imageDropPane.getImageData());
-                record.setNotes(notesArea.getText().trim());
                 return record;
             }
             return null;
         });
+    }
+
+    private void setHasChanges(boolean changed) {
+        hasChanges = changed;
+        Node saveButton = getDialogPane().lookupButton(saveButtonType);
+        saveButton.setDisable(!hasChanges || descriptionField.getText().trim().isEmpty());
     }
 }
