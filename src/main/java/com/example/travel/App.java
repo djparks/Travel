@@ -1,35 +1,96 @@
 package com.example.travel;
 
+import com.example.travel.model.TravelRecord;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class App extends Application {
 
-    private static final String DB_URL = "jdbc:h2:file:./traveldb";
+    private static final String DB_URL = "jdbc:h2:file:./traveldb;AUTO_SERVER=TRUE";
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
+    private TableView<TravelRecord> table;
+    private ObservableList<TravelRecord> records;
+    private Connection connection;
 
     @Override
     public void start(Stage stage) {
         initDatabase();
         
-        var label = new Label("Travel Application");
-        var scene = new Scene(new StackPane(label), 640, 480);
+        BorderPane root = new BorderPane();
+        root.setPadding(new Insets(10));
+
+        // Create TableView
+        table = new TableView<>();
+        records = FXCollections.observableArrayList();
+        table.setItems(records);
+
+        // Create columns
+        TableColumn<TravelRecord, String> descCol = new TableColumn<>("Description");
+        descCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        descCol.setPrefWidth(150);
+
+        TableColumn<TravelRecord, String> stateCol = new TableColumn<>("State");
+        stateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
+        stateCol.setPrefWidth(100);
+
+        TableColumn<TravelRecord, String> cityCol = new TableColumn<>("City");
+        cityCol.setCellValueFactory(new PropertyValueFactory<>("city"));
+        cityCol.setPrefWidth(100);
+
+        TableColumn<TravelRecord, String> addressCol = new TableColumn<>("Address");
+        addressCol.setCellValueFactory(new PropertyValueFactory<>("address"));
+        addressCol.setPrefWidth(150);
+
+        TableColumn<TravelRecord, String> zipCol = new TableColumn<>("ZIP");
+        zipCol.setCellValueFactory(new PropertyValueFactory<>("zip"));
+        zipCol.setPrefWidth(80);
+
+        table.getColumns().add(descCol);
+        table.getColumns().add(stateCol);
+        table.getColumns().add(cityCol);
+        table.getColumns().add(addressCol);
+        table.getColumns().add(zipCol);
+        table.getSortOrder().add(descCol); // Default sort by description
+
+        // Add button
+        Button addButton = new Button("Add New Record");
+        addButton.setOnAction(e -> showAddDialog(stage));
+
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.getChildren().add(addButton);
+        buttonBox.setPadding(new Insets(10, 0, 0, 0));
+
+        root.setCenter(table);
+        root.setBottom(buttonBox);
+
+        Scene scene = new Scene(root, 800, 600);
         stage.setScene(scene);
-        stage.setTitle("Travel Application");
+        stage.setTitle("Travel Records");
         stage.show();
+
+        // Load initial data
+        refreshTableData();
     }
 
     private void initDatabase() {
         try {
-            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            Statement stmt = conn.createStatement();
+            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            Statement stmt = connection.createStatement();
             
             // Create travel records table
             stmt.execute("""
@@ -48,8 +109,47 @@ public class App extends Application {
             """);
             
             stmt.close();
-            conn.close();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showAddDialog(Stage owner) {
+        AddRecordDialog dialog = new AddRecordDialog(owner);
+        dialog.showAndWait().ifPresent(record -> {
+            try {
+                record.save();
+                refreshTableData();
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Could not save record");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            }
+        });
+    }
+
+    private void refreshTableData() {
+        try {
+            records.clear();
+            records.addAll(TravelRecord.findAll());
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Could not load records");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    @Override
+    public void stop() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
