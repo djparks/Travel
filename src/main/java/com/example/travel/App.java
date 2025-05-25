@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Collectors;
+import jakarta.xml.bind.JAXBException;
+import java.io.IOException;
 import com.example.travel.util.XmlUtils;
 import com.example.travel.model.State;
 import com.example.travel.model.TravelRecord;
@@ -62,9 +64,9 @@ public class App extends Application {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Export Successful");
                     alert.setHeaderText(null);
-                    alert.setContentText("Travel records have been exported successfully!");
+                    alert.setContentText("Records have been exported successfully.");
                     alert.showAndWait();
-                } catch (Exception ex) {
+                } catch (JAXBException | SQLException | IOException ex) {
                     ex.printStackTrace();
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Export Error");

@@ -43,8 +43,10 @@ public class TravelRecord {
     private String zip;
     @XmlElement
     private String geo;
-    @XmlElement
+    @XmlTransient
     private byte[] picture;
+    @XmlElement
+    private String pictureFileName;
     @XmlElement
     private String notes;
     @XmlElement
@@ -256,6 +258,14 @@ public class TravelRecord {
 
     public void setPicture(byte[] picture) {
         this.picture = picture;
+    }
+
+    public String getPictureFileName() {
+        return pictureFileName;
+    }
+
+    public void setPictureFileName(String pictureFileName) {
+        this.pictureFileName = pictureFileName;
     }
 
     public String getNotes() {

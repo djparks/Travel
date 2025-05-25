@@ -3,6 +3,7 @@ package com.example.travel;
 import com.example.travel.model.State;
 import com.example.travel.model.TravelRecord;
 import javafx.geometry.Insets;
+import javafx.stage.Modality;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -24,6 +25,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         this.record = record;
         setTitle("Edit Travel Record");
         setHeaderText("Edit travel record details");
+        initModality(Modality.WINDOW_MODAL);
         initOwner(owner);
 
         // Create UI
@@ -32,12 +34,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        // Add fields
-        grid.add(new Label("Description:"), 0, 0);
-        grid.add(descriptionField, 1, 0);
+        // Initialize fields with record data
         descriptionField.setText(record.getDescription());
-
-        grid.add(new Label("URL:"), 0, 1);
         grid.add(urlField, 1, 1);
         urlField.setText(record.getUrl());
 
