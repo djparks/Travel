@@ -119,6 +119,7 @@ public class TravelRecord {
         TravelRecord record = new TravelRecord();
         record.setId(rs.getLong("id"));
         record.setDescription(rs.getString("description"));
+        record.setUrl(rs.getString("url"));
         record.setState(rs.getString("state"));
         record.setCity(rs.getString("city"));
         record.setAddress(rs.getString("address"));

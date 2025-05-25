@@ -1,6 +1,7 @@
 package com.example.travel;
 
 import com.example.travel.model.TravelRecord;
+import com.example.travel.model.USState;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -11,7 +12,7 @@ import javafx.stage.Window;
 public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField descriptionField = new TextField();
     private final TextField urlField = new TextField();
-    private final TextField stateField = new TextField();
+    private final ComboBox<USState> stateComboBox = new ComboBox<>();
     private final TextField cityField = new TextField();
     private final TextField addressField = new TextField();
     private final TextField zipField = new TextField();
@@ -37,7 +38,9 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(urlField, 3, 0);
         
         grid.add(new Label("State:"), 0, 1);
-        grid.add(stateField, 1, 1);
+        stateComboBox.getItems().addAll(USState.values());
+        stateComboBox.setPromptText("Select a state");
+        grid.add(stateComboBox, 1, 1);
         
         grid.add(new Label("City:"), 0, 2);
         grid.add(cityField, 1, 2);
@@ -75,7 +78,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
                 TravelRecord record = new TravelRecord();
                 record.setDescription(descriptionField.getText());
                 record.setUrl(urlField.getText());
-                record.setState(stateField.getText());
+                record.setState(stateComboBox.getValue() != null ? stateComboBox.getValue().name() : null);
                 record.setCity(cityField.getText());
                 record.setAddress(addressField.getText());
                 record.setZip(zipField.getText());
