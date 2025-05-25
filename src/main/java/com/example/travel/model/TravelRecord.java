@@ -1,6 +1,14 @@
 package com.example.travel.model;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
+import javax.sql.rowset.serial.SerialBlob;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +44,7 @@ public class TravelRecord {
     @XmlElement
     private String geo;
     @XmlElement
-    private String pictures;
+    private byte[] picture;
     @XmlElement
     private String notes;
     @XmlElement
@@ -70,7 +78,7 @@ public class TravelRecord {
         if (this.id == null) {
             // Create new record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, geo, pictures, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, geo, picture, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -79,7 +87,11 @@ public class TravelRecord {
                     stmt.setString(5, address);
                     stmt.setString(6, zip);
                     stmt.setString(7, geo);
-                    stmt.setString(8, pictures);
+                    if (picture != null && picture.length > 0) {
+                        stmt.setBlob(8, new SerialBlob(picture));
+                    } else {
+                        stmt.setNull(8, java.sql.Types.BLOB);
+                    }
                     stmt.setString(9, notes);
                     stmt.setTimestamp(10, Timestamp.valueOf(dateCreated));
                     stmt.setTimestamp(11, Timestamp.valueOf(dateUpdated));
@@ -95,7 +107,7 @@ public class TravelRecord {
         } else {
             // Update existing record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "UPDATE travel_records SET description=?, url=?, state=?, city=?, address=?, zip=?, geo=?, pictures=?, notes=?, date_updated=? WHERE id=?";
+                String sql = "UPDATE travel_records SET description = ?, url = ?, state = ?, city = ?, address = ?, zip = ?, geo = ?, picture = ?, notes = ?, date_updated = ? WHERE id = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -104,9 +116,12 @@ public class TravelRecord {
                     stmt.setString(5, address);
                     stmt.setString(6, zip);
                     stmt.setString(7, geo);
-                    stmt.setString(8, pictures);
+                    if (picture != null && picture.length > 0) {
+                        stmt.setBlob(8, new SerialBlob(picture));
+                    } else {
+                        stmt.setNull(8, Types.BLOB);
+                    }
                     stmt.setString(9, notes);
-                    setDateUpdated(LocalDateTime.now());
                     stmt.setTimestamp(10, Timestamp.valueOf(dateUpdated));
                     stmt.setLong(11, id);
                     stmt.executeUpdate();
@@ -166,7 +181,12 @@ public class TravelRecord {
         record.setCity(rs.getString("city"));
         record.setAddress(rs.getString("address"));
         record.setZip(rs.getString("zip"));
-        record.setPictures(rs.getString("pictures"));
+        java.sql.Blob blob = rs.getBlob("picture");
+        if (blob != null) {
+            record.setPicture(blob.getBytes(1, (int) blob.length()));
+        } else {
+            record.setPicture(null);
+        }
         record.setNotes(rs.getString("notes"));
         record.dateCreated = rs.getTimestamp("date_created").toLocalDateTime();
         record.dateUpdated = rs.getTimestamp("date_updated").toLocalDateTime();
@@ -230,12 +250,12 @@ public class TravelRecord {
         this.zip = zip;
     }
 
-    public String getPictures() {
-        return pictures;
+    public byte[] getPicture() {
+        return picture;
     }
 
-    public void setPictures(String pictures) {
-        this.pictures = pictures;
+    public void setPicture(byte[] picture) {
+        this.picture = picture;
     }
 
     public String getNotes() {

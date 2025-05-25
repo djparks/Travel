@@ -1,14 +1,14 @@
 package com.example.travel;
 
 import com.example.travel.model.TravelRecord;
-
 import com.example.travel.model.State;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.Node;
+import com.example.travel.components.ImageDropPane;
 import javafx.stage.Modality;
 import javafx.stage.Window;
+import javafx.scene.Node;
 
 public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField descriptionField = new TextField();
@@ -18,7 +18,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField addressField = new TextField();
     private final TextField zipField = new TextField();
     private final TextField geoField = new TextField();
-    private final TextArea picturesField = new TextArea();
+    private final ImageDropPane imageDropPane = new ImageDropPane();
     private final TextArea notesField = new TextArea();
 
     public AddRecordDialog(Window owner) {
@@ -56,9 +56,8 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("Geo:"), 2, 4);
         grid.add(geoField, 3, 4);
         
-        grid.add(new Label("Pictures:"), 0, 5);
-        picturesField.setPrefRowCount(2);
-        grid.add(picturesField, 1, 5);
+        grid.add(new Label("Picture:"), 0, 5);
+        grid.add(imageDropPane, 1, 5);
         
         grid.add(new Label("Notes:"), 0, 6);
         notesField.setPrefRowCount(2);
@@ -88,7 +87,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
                 record.setAddress(addressField.getText());
                 record.setZip(zipField.getText());
                 record.setGeo(geoField.getText());
-                record.setPictures(picturesField.getText());
+                record.setPicture(imageDropPane.getImageData());
                 record.setNotes(notesField.getText());
                 return record;
             }

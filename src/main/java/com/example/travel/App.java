@@ -291,6 +291,13 @@ public class App extends Application {
 
     private void initDatabase() {
         try {
+            // Drop existing table if exists
+            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                Statement dropStmt = conn.createStatement();
+                dropStmt.execute("DROP TABLE IF EXISTS travel_records");
+            }
+
+            // Create new table with proper BLOB column
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             Statement stmt = connection.createStatement();
             
@@ -305,16 +312,21 @@ public class App extends Application {
                     address VARCHAR(255),
                     zip VARCHAR(10),
                     geo VARCHAR(255),
-                    pictures TEXT,
+                    picture BLOB,
                     notes TEXT,
-                    date_created TIMESTAMP NOT NULL,
-                    date_updated TIMESTAMP NOT NULL
+                    date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    date_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
             """);
             
             stmt.close();
         } catch (Exception e) {
             e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Database Error");
+            alert.setHeaderText("Could not initialize database");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
         }
     }
 

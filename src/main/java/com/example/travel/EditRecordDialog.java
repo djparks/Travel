@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import com.example.travel.components.ImageDropPane;
 
 public class EditRecordDialog extends Dialog<TravelRecord> {
     private final TextField descriptionField = new TextField();
@@ -15,9 +16,9 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
     private final TextField addressField = new TextField();
     private final TextField zipField = new TextField();
     private final TextField geoField = new TextField();
-    private final TextArea picturesArea = new TextArea();
     private final TextArea notesArea = new TextArea();
-    private final TravelRecord record;
+    private final ImageDropPane imageDropPane = new ImageDropPane();
+    private final TravelRecord record;  // Used to initialize dialog fields and for validation
 
     public EditRecordDialog(Stage owner, TravelRecord record) {
         this.record = record;
@@ -67,10 +68,9 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(geoField, 1, 6);
         geoField.setText(record.getGeo());
 
-        grid.add(new Label("Pictures:"), 0, 7);
-        grid.add(picturesArea, 1, 7);
-        picturesArea.setText(record.getPictures());
-        picturesArea.setPrefRowCount(3);
+        grid.add(new Label("Picture:"), 0, 7);
+        grid.add(imageDropPane, 1, 7);
+        imageDropPane.setImageData(record.getPicture());
 
         grid.add(new Label("Notes:"), 0, 8);
         grid.add(notesArea, 1, 8);
@@ -100,7 +100,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
                 record.setAddress(addressField.getText().trim());
                 record.setZip(zipField.getText().trim());
                 record.setGeo(geoField.getText().trim());
-                record.setPictures(picturesArea.getText().trim());
+                record.setPicture(imageDropPane.getImageData());
                 record.setNotes(notesArea.getText().trim());
                 return record;
             }
