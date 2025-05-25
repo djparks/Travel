@@ -69,6 +69,12 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         notesArea.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         imageDropPane.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
 
+        grid.add(new Label("Description:*"), 0, 0);
+        grid.add(descriptionField, 1, 0);
+
+        grid.add(new Label("URL:"), 0, 1);
+        grid.add(urlField, 1, 1);
+
         grid.add(new Label("State:"), 0, 2);
         grid.add(stateComboBox, 1, 2);
 
