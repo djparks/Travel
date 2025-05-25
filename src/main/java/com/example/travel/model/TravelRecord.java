@@ -69,12 +69,9 @@ public class TravelRecord {
                     stmt.setString(7, geo);
                     stmt.setString(8, pictures);
                     stmt.setString(9, notes);
-                    stmt.setString(5, zip);
-                    stmt.setString(6, pictures);
-                    stmt.setString(7, notes);
                     setDateUpdated(LocalDateTime.now());
-                    stmt.setTimestamp(8, Timestamp.valueOf(dateUpdated));
-                    stmt.setLong(9, id);
+                    stmt.setTimestamp(10, Timestamp.valueOf(dateUpdated));
+                    stmt.setLong(11, id);
                     stmt.executeUpdate();
                 }
             }

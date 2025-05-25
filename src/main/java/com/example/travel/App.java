@@ -112,9 +112,44 @@ public class App extends Application {
         Button addButton = new Button("Add New Record");
         addButton.setOnAction(e -> showAddDialog(stage));
 
+        // Delete button
+        Button deleteButton = new Button("Delete Record");
+        deleteButton.setDisable(true); // Initially disabled
+
+        // Enable/disable delete button based on selection
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            deleteButton.setDisable(newSelection == null);
+        });
+
+        deleteButton.setOnAction(e -> {
+            TravelRecord selectedRecord = table.getSelectionModel().getSelectedItem();
+            if (selectedRecord != null) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Confirm Delete");
+                alert.setHeaderText("Delete Record");
+                alert.setContentText("Are you sure you want to delete this record?");
+
+                alert.showAndWait().ifPresent(response -> {
+                    if (response == ButtonType.OK) {
+                        try {
+                            selectedRecord.delete();
+                            refreshTableData();
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                            errorAlert.setTitle("Error");
+                            errorAlert.setHeaderText("Could not delete record");
+                            errorAlert.setContentText(ex.getMessage());
+                            errorAlert.showAndWait();
+                        }
+                    }
+                });
+            }
+        });
+
         HBox buttonBox = new HBox(10);
-        buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.getChildren().add(addButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.getChildren().addAll(deleteButton, addButton);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
 
         root.setCenter(tableContainer);
@@ -148,6 +183,7 @@ public class App extends Application {
                     city VARCHAR(255),
                     address VARCHAR(255),
                     zip VARCHAR(10),
+                    geo VARCHAR(255),
                     pictures TEXT,
                     notes TEXT,
                     date_created TIMESTAMP NOT NULL,
