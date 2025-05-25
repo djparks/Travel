@@ -111,6 +111,17 @@ public class App extends Application {
         table = new TableView<>();
         records = FXCollections.observableArrayList();
         table.setItems(records);
+
+        // Double click to edit
+        table.setRowFactory(tv -> {
+            TableRow<TravelRecord> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    showEditDialog(stage, row.getItem());
+                }
+            });
+            return row;
+        });
         
         // Configure table properties
         table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
