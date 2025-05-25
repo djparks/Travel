@@ -53,6 +53,20 @@ public class TravelRecord {
 
     // CRUD Operations
     public void save() throws SQLException {
+        // Check if description already exists
+        if (this.id == null) { // Only check for new records
+            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                String checkSql = "SELECT COUNT(*) FROM travel_records WHERE description = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(checkSql)) {
+                    stmt.setString(1, this.description);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            throw new SQLException("A record with this description already exists.");
+                        }
+                    }
+                }
+            }
+        }
         if (this.id == null) {
             // Create new record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {

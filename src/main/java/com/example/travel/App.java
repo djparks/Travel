@@ -245,7 +245,7 @@ public class App extends Application {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS travel_records (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                    description VARCHAR(255) NOT NULL,
+                    description VARCHAR(255) NOT NULL UNIQUE,
                     url VARCHAR(1024),
                     state VARCHAR(255),
                     city VARCHAR(255),
@@ -271,11 +271,17 @@ public class App extends Application {
             try {
                 record.save();
                 refreshTableData();
-            } catch (Exception e) {
+            } catch (SQLException e) {
+                e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
-                alert.setHeaderText("Could not save record");
-                alert.setContentText(e.getMessage());
+                if (e.getMessage().contains("description already exists")) {
+                    alert.setHeaderText("Duplicate Description");
+                    alert.setContentText("A record with this description already exists. Please use a different description.");
+                } else {
+                    alert.setHeaderText("Could not save record");
+                    alert.setContentText(e.getMessage());
+                }
                 alert.showAndWait();
             }
         });
