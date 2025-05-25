@@ -4,23 +4,46 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.adapters.*;
+import com.example.travel.util.LocalDateTimeAdapter;
 
+@XmlRootElement(name = "travelRecord")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class TravelRecord {
+    @XmlTransient // Don't serialize database connection info
     private static final String DB_URL = "jdbc:h2:file:./traveldb";
+    @XmlTransient
     private static final String DB_USER = "sa";
+    @XmlTransient
     private static final String DB_PASSWORD = "";
 
+
+    @XmlElement
     private Long id;
+    @XmlElement
     private String description;
+    @XmlElement
     private String url;
+    @XmlElement
     private String state;
+    @XmlElement
     private String city;
+    @XmlElement
     private String address;
+    @XmlElement
     private String zip;
+    @XmlElement
     private String geo;
+    @XmlElement
     private String pictures;
+    @XmlElement
     private String notes;
+    @XmlElement
+    @XmlJavaTypeAdapter(value = LocalDateTimeAdapter.class)
     private LocalDateTime dateCreated;
+    @XmlElement
+    @XmlJavaTypeAdapter(value = LocalDateTimeAdapter.class)
     private LocalDateTime dateUpdated;
 
     public TravelRecord() {

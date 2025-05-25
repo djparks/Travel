@@ -13,12 +13,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.control.ScrollPane;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import com.example.travel.util.XmlUtils;
 
 public class App extends Application {
 
@@ -35,6 +39,70 @@ public class App extends Application {
         
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
+        
+        // Create menu bar
+        MenuBar menuBar = new MenuBar();
+        Menu fileMenu = new Menu("File");
+        
+        MenuItem exportMenuItem = new MenuItem("Export to XML");
+        exportMenuItem.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Export Travel Records");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml")
+            );
+            File file = fileChooser.showSaveDialog(stage);
+            if (file != null) {
+                try {
+                    List<TravelRecord> records = TravelRecord.findAll();
+                    XmlUtils.exportToXml(records, file);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Export Successful");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Travel records have been exported successfully!");
+                    alert.showAndWait();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Export Error");
+                    alert.setHeaderText("Could not export records");
+                    alert.setContentText(ex.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
+        
+        MenuItem importMenuItem = new MenuItem("Import from XML");
+        importMenuItem.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Import Travel Records");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml")
+            );
+            File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                try {
+                    List<TravelRecord> importedRecords = XmlUtils.importFromXml(file);
+                    refreshTableData();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Import Successful");
+                    alert.setHeaderText(null);
+                    alert.setContentText(importedRecords.size() + " travel records have been imported successfully!");
+                    alert.showAndWait();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Import Error");
+                    alert.setHeaderText("Could not import records");
+                    alert.setContentText(ex.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
+        
+        fileMenu.getItems().addAll(exportMenuItem, importMenuItem);
+        menuBar.getMenus().add(fileMenu);
+        root.setTop(menuBar);
 
         // Create TableView
         table = new TableView<>();
