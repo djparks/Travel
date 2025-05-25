@@ -31,13 +31,19 @@ public class App extends Application {
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             Statement stmt = conn.createStatement();
             
-            // Create example table
+            // Create travel records table
             stmt.execute("""
-                CREATE TABLE IF NOT EXISTS destinations (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(255) NOT NULL,
-                    country VARCHAR(255) NOT NULL,
-                    description TEXT
+                CREATE TABLE IF NOT EXISTS travel_records (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    description VARCHAR(255) NOT NULL,
+                    state VARCHAR(255) NOT NULL,
+                    city VARCHAR(255) NOT NULL,
+                    address VARCHAR(255) NOT NULL,
+                    zip VARCHAR(10),
+                    pictures TEXT,
+                    notes TEXT,
+                    date_created TIMESTAMP NOT NULL,
+                    date_updated TIMESTAMP NOT NULL
                 )
             """);
             

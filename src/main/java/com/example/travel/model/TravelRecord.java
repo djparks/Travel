@@ -1,56 +1,140 @@
 package com.example.travel.model;
 
-import jakarta.persistence.*;
+import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
-@Table(name = "travel_records")
 public class TravelRecord {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private static final String DB_URL = "jdbc:h2:file:./traveldb";
+    private static final String DB_USER = "sa";
+    private static final String DB_PASSWORD = "";
+
     private Long id;
-
-    @Column(nullable = false)
     private String description;
-
-    @Column(nullable = false)
     private String state;
-
-    @Column(nullable = false)
     private String city;
-
-    @Column(nullable = false)
     private String address;
-
-    @Column(length = 10)
     private String zip;
-
-    @Column(columnDefinition = "TEXT")
     private String pictures;
-
-    @Column(columnDefinition = "TEXT")
     private String notes;
-
-    @Column(nullable = false, updatable = false)
     private LocalDateTime dateCreated;
-
-    @Column(nullable = false)
     private LocalDateTime dateUpdated;
 
-    @PrePersist
-    protected void onCreate() {
-        dateCreated = LocalDateTime.now();
-        dateUpdated = dateCreated;
+    public TravelRecord() {
+        this.dateCreated = LocalDateTime.now();
+        this.dateUpdated = this.dateCreated;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        dateUpdated = LocalDateTime.now();
+    // CRUD Operations
+    public void save() throws SQLException {
+        if (this.id == null) {
+            // Create new record
+            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                String sql = "INSERT INTO travel_records (description, state, city, address, zip, pictures, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                    stmt.setString(1, description);
+                    stmt.setString(2, state);
+                    stmt.setString(3, city);
+                    stmt.setString(4, address);
+                    stmt.setString(5, zip);
+                    stmt.setString(6, pictures);
+                    stmt.setString(7, notes);
+                    stmt.setTimestamp(8, Timestamp.valueOf(dateCreated));
+                    stmt.setTimestamp(9, Timestamp.valueOf(dateUpdated));
+                    stmt.executeUpdate();
+
+                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            this.id = generatedKeys.getLong(1);
+                        }
+                    }
+                }
+            }
+        } else {
+            // Update existing record
+            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                String sql = "UPDATE travel_records SET description=?, state=?, city=?, address=?, zip=?, pictures=?, notes=?, date_updated=? WHERE id=?";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, description);
+                    stmt.setString(2, state);
+                    stmt.setString(3, city);
+                    stmt.setString(4, address);
+                    stmt.setString(5, zip);
+                    stmt.setString(6, pictures);
+                    stmt.setString(7, notes);
+                    setDateUpdated(LocalDateTime.now());
+                    stmt.setTimestamp(8, Timestamp.valueOf(dateUpdated));
+                    stmt.setLong(9, id);
+                    stmt.executeUpdate();
+                }
+            }
+        }
+    }
+
+    public static TravelRecord findById(Long id) throws SQLException {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "SELECT * FROM travel_records WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, id);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return mapResultSetToRecord(rs);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static List<TravelRecord> findAll() throws SQLException {
+        List<TravelRecord> records = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "SELECT * FROM travel_records ORDER BY date_created DESC";
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    records.add(mapResultSetToRecord(rs));
+                }
+            }
+        }
+        return records;
+    }
+
+    public void delete() throws SQLException {
+        if (this.id != null) {
+            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+                String sql = "DELETE FROM travel_records WHERE id = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setLong(1, id);
+                    stmt.executeUpdate();
+                }
+            }
+        }
+    }
+
+    private static TravelRecord mapResultSetToRecord(ResultSet rs) throws SQLException {
+        TravelRecord record = new TravelRecord();
+        record.setId(rs.getLong("id"));
+        record.setDescription(rs.getString("description"));
+        record.setState(rs.getString("state"));
+        record.setCity(rs.getString("city"));
+        record.setAddress(rs.getString("address"));
+        record.setZip(rs.getString("zip"));
+        record.setPictures(rs.getString("pictures"));
+        record.setNotes(rs.getString("notes"));
+        record.dateCreated = rs.getTimestamp("date_created").toLocalDateTime();
+        record.dateUpdated = rs.getTimestamp("date_updated").toLocalDateTime();
+        return record;
     }
 
     // Getters and Setters
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDescription() {
@@ -115,5 +199,9 @@ public class TravelRecord {
 
     public LocalDateTime getDateUpdated() {
         return dateUpdated;
+    }
+
+    public void setDateUpdated(LocalDateTime dateUpdated) {
+        this.dateUpdated = dateUpdated;
     }
 }
