@@ -12,6 +12,7 @@ public class TravelRecord {
 
     private Long id;
     private String description;
+    private String url;
     private String state;
     private String city;
     private String address;
@@ -31,17 +32,18 @@ public class TravelRecord {
         if (this.id == null) {
             // Create new record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "INSERT INTO travel_records (description, state, city, address, zip, pictures, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, pictures, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                     stmt.setString(1, description);
-                    stmt.setString(2, state);
-                    stmt.setString(3, city);
-                    stmt.setString(4, address);
-                    stmt.setString(5, zip);
-                    stmt.setString(6, pictures);
-                    stmt.setString(7, notes);
-                    stmt.setTimestamp(8, Timestamp.valueOf(dateCreated));
-                    stmt.setTimestamp(9, Timestamp.valueOf(dateUpdated));
+                    stmt.setString(2, url);
+                    stmt.setString(3, state);
+                    stmt.setString(4, city);
+                    stmt.setString(5, address);
+                    stmt.setString(6, zip);
+                    stmt.setString(7, pictures);
+                    stmt.setString(8, notes);
+                    stmt.setTimestamp(9, Timestamp.valueOf(dateCreated));
+                    stmt.setTimestamp(10, Timestamp.valueOf(dateUpdated));
                     stmt.executeUpdate();
 
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -54,7 +56,7 @@ public class TravelRecord {
         } else {
             // Update existing record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "UPDATE travel_records SET description=?, state=?, city=?, address=?, zip=?, pictures=?, notes=?, date_updated=? WHERE id=?";
+                String sql = "UPDATE travel_records SET description=?, url=?, state=?, city=?, address=?, zip=?, pictures=?, notes=?, date_updated=? WHERE id=?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, description);
                     stmt.setString(2, state);
@@ -143,6 +145,14 @@ public class TravelRecord {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getState() {

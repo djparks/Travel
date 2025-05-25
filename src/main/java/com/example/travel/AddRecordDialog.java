@@ -10,6 +10,7 @@ import javafx.stage.Window;
 
 public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField descriptionField = new TextField();
+    private final TextField urlField = new TextField();
     private final TextField stateField = new TextField();
     private final TextField cityField = new TextField();
     private final TextField addressField = new TextField();
@@ -32,13 +33,16 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("Description:*"), 0, 0);
         grid.add(descriptionField, 1, 0);
         
-        grid.add(new Label("State:*"), 0, 1);
+        grid.add(new Label("URL:"), 2, 0);
+        grid.add(urlField, 3, 0);
+        
+        grid.add(new Label("State:"), 0, 1);
         grid.add(stateField, 1, 1);
         
-        grid.add(new Label("City:*"), 0, 2);
+        grid.add(new Label("City:"), 0, 2);
         grid.add(cityField, 1, 2);
         
-        grid.add(new Label("Address:*"), 0, 3);
+        grid.add(new Label("Address:"), 0, 3);
         grid.add(addressField, 1, 3);
         
         grid.add(new Label("ZIP:"), 0, 4);
@@ -65,17 +69,12 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         // Add validation listeners
         descriptionField.textProperty().addListener((obs, oldVal, newVal) -> 
             validateFields(saveButton));
-        stateField.textProperty().addListener((obs, oldVal, newVal) -> 
-            validateFields(saveButton));
-        cityField.textProperty().addListener((obs, oldVal, newVal) -> 
-            validateFields(saveButton));
-        addressField.textProperty().addListener((obs, oldVal, newVal) -> 
-            validateFields(saveButton));
 
         setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
                 TravelRecord record = new TravelRecord();
                 record.setDescription(descriptionField.getText());
+                record.setUrl(urlField.getText());
                 record.setState(stateField.getText());
                 record.setCity(cityField.getText());
                 record.setAddress(addressField.getText());
@@ -89,10 +88,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
     }
 
     private void validateFields(Node saveButton) {
-        boolean isValid = !descriptionField.getText().trim().isEmpty() &&
-                         !stateField.getText().trim().isEmpty() &&
-                         !cityField.getText().trim().isEmpty() &&
-                         !addressField.getText().trim().isEmpty();
+        boolean isValid = !descriptionField.getText().trim().isEmpty();
         saveButton.setDisable(!isValid);
     }
 }

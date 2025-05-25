@@ -43,6 +43,10 @@ public class App extends Application {
         descCol.setCellValueFactory(new PropertyValueFactory<>("description"));
         descCol.setPrefWidth(150);
 
+        TableColumn<TravelRecord, String> urlCol = new TableColumn<>("URL");
+        urlCol.setCellValueFactory(new PropertyValueFactory<>("url"));
+        urlCol.setPrefWidth(200);
+
         TableColumn<TravelRecord, String> stateCol = new TableColumn<>("State");
         stateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
         stateCol.setPrefWidth(100);
@@ -60,6 +64,7 @@ public class App extends Application {
         zipCol.setPrefWidth(80);
 
         table.getColumns().add(descCol);
+        table.getColumns().add(urlCol);
         table.getColumns().add(stateCol);
         table.getColumns().add(cityCol);
         table.getColumns().add(addressCol);
@@ -97,9 +102,10 @@ public class App extends Application {
                 CREATE TABLE IF NOT EXISTS travel_records (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     description VARCHAR(255) NOT NULL,
-                    state VARCHAR(255) NOT NULL,
-                    city VARCHAR(255) NOT NULL,
-                    address VARCHAR(255) NOT NULL,
+                    url VARCHAR(1024),
+                    state VARCHAR(255),
+                    city VARCHAR(255),
+                    address VARCHAR(255),
                     zip VARCHAR(10),
                     pictures TEXT,
                     notes TEXT,
