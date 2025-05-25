@@ -238,9 +238,25 @@ public class App extends Application {
             }
         });
 
+        // Edit button
+        Button editButton = new Button("Update Record");
+        editButton.setDisable(true); // Initially disabled
+
+        // Enable/disable edit button based on selection
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            editButton.setDisable(newSelection == null);
+        });
+
+        editButton.setOnAction(e -> {
+            TravelRecord selectedRecord = table.getSelectionModel().getSelectedItem();
+            if (selectedRecord != null) {
+                showEditDialog(stage, selectedRecord);
+            }
+        });
+
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER_LEFT);
-        buttonBox.getChildren().addAll(addButton, deleteButton);
+        buttonBox.getChildren().addAll(addButton, editButton, deleteButton);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
 
         VBox centerBox = new VBox(10);
@@ -296,6 +312,28 @@ public class App extends Application {
         dialog.showAndWait().ifPresent(record -> {
             try {
                 record.save();
+                refreshTableData();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                if (e.getMessage().contains("description already exists")) {
+                    alert.setHeaderText("Duplicate Description");
+                    alert.setContentText("A record with this description already exists. Please use a different description.");
+                } else {
+                    alert.setHeaderText("Could not save record");
+                    alert.setContentText(e.getMessage());
+                }
+                alert.showAndWait();
+            }
+        });
+    }
+
+    private void showEditDialog(Stage owner, TravelRecord record) {
+        EditRecordDialog dialog = new EditRecordDialog(owner, record);
+        dialog.showAndWait().ifPresent(result -> {
+            try {
+                result.save();
                 refreshTableData();
             } catch (SQLException e) {
                 e.printStackTrace();
