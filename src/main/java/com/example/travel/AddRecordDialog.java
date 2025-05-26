@@ -55,9 +55,11 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
 
         grid.add(new Label("ZIP:"), 0, 4);
         grid.add(zipField, 1, 4);
+        zipField.setPrefColumnCount(10);
 
         grid.add(new Label("Phone:"), 2, 4);
         grid.add(phoneNumberField, 3, 4);
+        phoneNumberField.setPrefColumnCount(13);
 
         grid.add(new Label("Geo:"), 0, 5);
         grid.add(geoField, 1, 5);

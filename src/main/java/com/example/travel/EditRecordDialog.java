@@ -98,29 +98,31 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("ZIP:"), 0, 5);
         grid.add(zipField, 1, 5);
         zipField.setText(record.getZip());
+        zipField.setPrefColumnCount(10);
 
-        grid.add(new Label("Phone:"), 0, 6);
-        grid.add(phoneNumberField, 1, 6);
+        grid.add(new Label("Phone:"), 2, 5);
+        grid.add(phoneNumberField, 3, 5);
         phoneNumberField.setText(record.getPhoneNumber());
+        phoneNumberField.setPrefColumnCount(13);
 
-        grid.add(new Label("Geo:"), 0, 7);
-        grid.add(geoField, 1, 7);
+        grid.add(new Label("Geo:"), 0, 6);
+        grid.add(geoField, 1, 6);
         geoField.setText(record.getGeo());
 
-        grid.add(new Label("Picture:"), 0, 8);
-        grid.add(imageDropPane, 1, 8);
+        grid.add(new Label("Picture:"), 0, 7);
+        grid.add(imageDropPane, 1, 7);
         imageDropPane.setImageData(record.getPicture());
 
-        grid.add(new Label("Notes:"), 0, 9);
-        grid.add(notesArea, 1, 9);
+        grid.add(new Label("Notes:"), 0, 8);
+        grid.add(notesArea, 1, 8);
         notesArea.setText(record.getNotes());
         notesArea.setPrefRowCount(6);
         notesArea.setMaxWidth(Double.MAX_VALUE);
 
         // Add checkboxes for visited and plan
-        grid.add(new Label("Status:"), 0, 10);
-        grid.add(visitedCheckBox, 1, 10);
-        grid.add(planCheckBox, 2, 10);
+        grid.add(new Label("Status:"), 0, 9);
+        grid.add(visitedCheckBox, 1, 9);
+        grid.add(planCheckBox, 2, 9);
 
         getDialogPane().setContent(grid);
 
