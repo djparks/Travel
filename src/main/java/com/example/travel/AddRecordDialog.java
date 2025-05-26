@@ -68,7 +68,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(imageDropPane, 1, 6);
 
         grid.add(new Label("Notes:"), 0, 7);
-        notesField.setPrefRowCount(2);
+        notesField.setPrefRowCount(6);
         notesField.setMaxWidth(Double.MAX_VALUE);
         grid.add(notesField, 1, 7, 3, 1);
 
