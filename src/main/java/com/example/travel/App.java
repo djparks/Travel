@@ -38,6 +38,9 @@ public class App extends Application {
     private TableView<TravelRecord> table;
     private ObservableList<TravelRecord> records;
     private Connection connection;
+    private TextField descriptionFilter;
+    private ComboBox<State> stateFilter;
+    private CheckBox hideVisitedFilter;
 
     @Override
     public void start(Stage stage) {
@@ -208,15 +211,15 @@ public class App extends Application {
         table.getSortOrder().add(descCol); // Default sort by description
 
         // Filter fields
-        TextField descriptionFilter = new TextField();
+        descriptionFilter = new TextField();
         descriptionFilter.setPromptText("Filter by description...");
-        ComboBox<State> stateFilter = new ComboBox<>();
+        stateFilter = new ComboBox<>();
         stateFilter.setPromptText("Filter by state...");
         stateFilter.getItems().addAll(State.values());
         stateFilter.getItems().add(0, null); // Add null option for "All states"
 
         // Add Hide Visited checkbox
-        CheckBox hideVisitedFilter = new CheckBox("Hide Visited");
+        hideVisitedFilter = new CheckBox("Hide Visited");
         hideVisitedFilter.setSelected(true); // Set to checked by default
 
         // Add filter listeners
@@ -428,8 +431,14 @@ public class App extends Application {
 
     private void refreshTableData() {
         try {
-            records.clear();
-            records.addAll(TravelRecord.findAll());
+            // Instead of just loading all records, apply the current filters
+            if (descriptionFilter != null && stateFilter != null && hideVisitedFilter != null) {
+                applyFilters(descriptionFilter, stateFilter, hideVisitedFilter);
+            } else {
+                // This will only happen before the UI is fully initialized
+                records.clear();
+                records.addAll(TravelRecord.findAll());
+            }
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
