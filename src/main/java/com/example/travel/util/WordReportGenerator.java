@@ -1,8 +1,11 @@
 package com.example.travel.util;
 
 import com.example.travel.model.TravelRecord;
+import org.apache.poi.common.usermodel.PictureType;
+import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -145,6 +148,39 @@ public class WordReportGenerator {
             notesContentRun.setText(record.getNotes());
             notesContentRun.setFontSize(12);
             notesContentRun.addBreak();
+        }
+
+        // Add image if available
+        if (record.getPicture() != null && record.getPicture().length > 0) {
+            try {
+                XWPFParagraph imageParagraph = document.createParagraph();
+                imageParagraph.setAlignment(ParagraphAlignment.CENTER);
+                XWPFRun imageRun = imageParagraph.createRun();
+
+                // Add a label for the image
+                XWPFParagraph imageLabelParagraph = document.createParagraph();
+                imageLabelParagraph.setAlignment(ParagraphAlignment.CENTER);
+                XWPFRun imageLabelRun = imageLabelParagraph.createRun();
+                imageLabelRun.setText("Image:");
+                imageLabelRun.setBold(true);
+                imageLabelRun.setFontSize(12);
+
+                // Set reasonable width and height for the image
+                // Using 300x200 points as a reasonable size that will fit well in the document
+                // Add the image to the document
+                ByteArrayInputStream imageStream = new ByteArrayInputStream(record.getPicture());
+                imageRun.addPicture(imageStream, PictureType.JPEG, 
+                    record.getPictureFileName() != null ? record.getPictureFileName() : "image.jpg", 
+                    Units.toEMU(300), Units.toEMU(200)); // Width: 300 points, Height: 200 points
+                imageRun.addBreak();
+            } catch (Exception e) {
+                // If there's an error adding the image, log it but continue with the report
+                XWPFParagraph errorParagraph = document.createParagraph();
+                XWPFRun errorRun = errorParagraph.createRun();
+                errorRun.setText("Error adding image: " + e.getMessage());
+                errorRun.setColor("FF0000");
+                errorRun.addBreak();
+            }
         }
 
         // Add a separator
