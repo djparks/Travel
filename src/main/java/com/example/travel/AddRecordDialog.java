@@ -42,20 +42,20 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("URL:"), 2, 0);
         grid.add(urlField, 3, 0);
 
-        grid.add(new Label("State:"), 0, 1);
+        grid.add(new Label("City:"), 0, 1);
+        grid.add(cityField, 1, 1);
+
+        grid.add(new Label("State:"), 2, 1);
         stateComboBox.getItems().addAll(State.values());
         stateComboBox.setPromptText("Select a state");
-        grid.add(stateComboBox, 1, 1);
-
-        grid.add(new Label("City:"), 0, 2);
-        grid.add(cityField, 1, 2);
+        grid.add(stateComboBox, 3, 1);
 
         grid.add(new Label("Address:"), 0, 3);
         grid.add(addressField, 1, 3);
 
         grid.add(new Label("ZIP:"), 0, 4);
         grid.add(zipField, 1, 4);
-        zipField.setPrefColumnCount(10);
+        zipField.setPrefColumnCount(5);
 
         grid.add(new Label("Phone:"), 2, 4);
         grid.add(phoneNumberField, 3, 4);

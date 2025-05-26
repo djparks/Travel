@@ -84,12 +84,12 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("URL:"), 0, 1);
         grid.add(urlField, 1, 1);
 
-        grid.add(new Label("State:"), 0, 2);
-        grid.add(stateComboBox, 1, 2);
-
-        grid.add(new Label("City:"), 0, 3);
-        grid.add(cityField, 1, 3);
+        grid.add(new Label("City:"), 0, 2);
+        grid.add(cityField, 1, 2);
         cityField.setText(record.getCity());
+
+        grid.add(new Label("State:"), 2, 2);
+        grid.add(stateComboBox, 3, 2);
 
         grid.add(new Label("Address:"), 0, 4);
         grid.add(addressField, 1, 4);
@@ -98,7 +98,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("ZIP:"), 0, 5);
         grid.add(zipField, 1, 5);
         zipField.setText(record.getZip());
-        zipField.setPrefColumnCount(10);
+        zipField.setPrefColumnCount(5);
 
         grid.add(new Label("Phone:"), 2, 5);
         grid.add(phoneNumberField, 3, 5);
