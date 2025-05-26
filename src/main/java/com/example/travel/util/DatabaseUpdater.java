@@ -26,7 +26,7 @@ public class DatabaseUpdater {
                     System.out.println("Added 'visited' column to travel_records table");
                 } catch (SQLException e) {
                     // Column might already exist, which is fine
-                    if (e.getMessage().contains("already exists")) {
+                    if (e.getMessage().toLowerCase().contains("duplicate column name")) {
                         System.out.println("Column 'visited' already exists");
                     } else {
                         throw e;
@@ -39,7 +39,7 @@ public class DatabaseUpdater {
                     System.out.println("Added 'plan' column to travel_records table");
                 } catch (SQLException e) {
                     // Column might already exist, which is fine
-                    if (e.getMessage().contains("already exists")) {
+                    if (e.getMessage().toLowerCase().contains("duplicate column name")) {
                         System.out.println("Column 'plan' already exists");
                     } else {
                         throw e;

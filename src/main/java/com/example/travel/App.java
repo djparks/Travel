@@ -186,14 +186,14 @@ public class App extends Application {
 
         TableColumn<TravelRecord, Boolean> visitedCol = new TableColumn<>("Visited");
         visitedCol.setCellValueFactory(new PropertyValueFactory<>("visited"));
-        visitedCol.setPrefWidth(80);
-        visitedCol.setMinWidth(80);
-        visitedCol.setResizable(true);
+        visitedCol.setPrefWidth(0);
+        visitedCol.setMinWidth(0);
+        visitedCol.setResizable(false);
 
         TableColumn<TravelRecord, Boolean> planCol = new TableColumn<>("Plan");
         planCol.setCellValueFactory(new PropertyValueFactory<>("plan"));
-        planCol.setPrefWidth(80);
-        planCol.setMinWidth(80);
+        planCol.setPrefWidth(50);
+        planCol.setMinWidth(50);
         planCol.setResizable(true);
 
         table.getColumns().add(descCol);
@@ -215,14 +215,23 @@ public class App extends Application {
         stateFilter.getItems().addAll(State.values());
         stateFilter.getItems().add(0, null); // Add null option for "All states"
 
+        // Add Hide Visited checkbox
+        CheckBox hideVisitedFilter = new CheckBox("Hide Visited");
+        hideVisitedFilter.setSelected(true); // Set to checked by default
+
         // Add filter listeners
-        descriptionFilter.textProperty().addListener((obs, oldVal, newVal) -> applyFilters(descriptionFilter, stateFilter));
-        stateFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters(descriptionFilter, stateFilter));
+        descriptionFilter.textProperty().addListener((obs, oldVal, newVal) -> 
+            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter));
+        stateFilter.valueProperty().addListener((obs, oldVal, newVal) -> 
+            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter));
+        hideVisitedFilter.selectedProperty().addListener((obs, oldVal, newVal) -> 
+            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter));
 
         HBox filterBox = new HBox(10);
         filterBox.getChildren().addAll(
             new Label("Description:"), descriptionFilter,
-            new Label("State:"), stateFilter
+            new Label("State:"), stateFilter,
+            hideVisitedFilter
         );
         filterBox.setAlignment(Pos.CENTER_LEFT);
         filterBox.setPadding(new Insets(0, 0, 10, 0));
@@ -252,7 +261,7 @@ public class App extends Application {
                     if (response == ButtonType.OK) {
                         try {
                             selectedRecord.delete();
-                            applyFilters(descriptionFilter, stateFilter); // Refresh with filters
+                            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter); // Refresh with filters
                         } catch (SQLException ex) {
                             ex.printStackTrace();
                             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -388,9 +397,10 @@ public class App extends Application {
         });
     }
 
-    private void applyFilters(TextField descriptionFilter, ComboBox<State> stateFilter) {
+    private void applyFilters(TextField descriptionFilter, ComboBox<State> stateFilter, CheckBox hideVisitedFilter) {
         String descriptionText = descriptionFilter.getText().toLowerCase().trim();
         State selectedState = stateFilter.getValue();
+        boolean hideVisited = hideVisitedFilter.isSelected();
 
         try {
             List<TravelRecord> allRecords = TravelRecord.findAll();
@@ -400,7 +410,8 @@ public class App extends Application {
                      record.getDescription().toLowerCase().contains(descriptionText)) &&
                     (selectedState == null || 
                      (record.getState() != null && 
-                      record.getState().equals(selectedState.name())))
+                      record.getState().equals(selectedState.name()))) &&
+                    (!hideVisited || record.getVisited() == null || !record.getVisited())
                 )
                 .collect(Collectors.toList());
 
