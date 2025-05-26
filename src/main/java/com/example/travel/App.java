@@ -17,6 +17,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.control.ScrollPane;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -24,9 +25,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.xml.bind.JAXBException;
-import java.io.IOException;
 import com.example.travel.util.XmlUtils;
 import com.example.travel.util.DatabaseUpdater;
+import com.example.travel.util.WordReportGenerator;
 import com.example.travel.model.State;
 import com.example.travel.model.TravelRecord;
 
@@ -294,9 +295,37 @@ public class App extends Application {
             }
         });
 
+        // Report generation button
+        Button reportButton = new Button("Generate Planned Visits Report");
+        reportButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Planned Visits Report");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Word documents (*.docx)", "*.docx")
+            );
+            File file = fileChooser.showSaveDialog(stage);
+            if (file != null) {
+                try {
+                    WordReportGenerator.generatePlannedVisitsReport(file.getAbsolutePath());
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Report Generated");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Planned visits report has been generated successfully.");
+                    alert.showAndWait();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Report Generation Error");
+                    alert.setHeaderText("Could not generate report");
+                    alert.setContentText(ex.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
+
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER_LEFT);
-        buttonBox.getChildren().addAll(addButton, editButton, deleteButton);
+        buttonBox.getChildren().addAll(addButton, editButton, deleteButton, reportButton);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
 
         VBox centerBox = new VBox(10);
