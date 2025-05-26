@@ -15,7 +15,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.control.ScrollPane;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -136,14 +135,8 @@ public class App extends Application {
         table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         table.setMinWidth(800);
 
-        // Create ScrollPane to handle horizontal scrolling
-        ScrollPane scrollPane = new ScrollPane(table);
-        scrollPane.setFitToHeight(true);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-
-        // Create a VBox to hold the ScrollPane and allow it to grow
-        VBox tableContainer = new VBox(scrollPane);
+        // Create a VBox to hold the table and allow it to grow
+        VBox tableContainer = new VBox(table);
         VBox.setVgrow(tableContainer, Priority.ALWAYS);
         tableContainer.setFillWidth(true);
 
