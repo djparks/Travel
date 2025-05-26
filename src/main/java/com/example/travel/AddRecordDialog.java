@@ -69,7 +69,8 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
 
         grid.add(new Label("Notes:"), 0, 7);
         notesField.setPrefRowCount(2);
-        grid.add(notesField, 1, 7);
+        notesField.setMaxWidth(Double.MAX_VALUE);
+        grid.add(notesField, 1, 7, 3, 1);
 
         // Add checkboxes for visited and plan
         grid.add(new Label("Status:"), 0, 8);

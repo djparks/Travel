@@ -114,7 +114,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         imageDropPane.setImageData(record.getPicture());
 
         grid.add(new Label("Notes:"), 0, 8);
-        grid.add(notesArea, 1, 8);
+        grid.add(notesArea, 1, 8, 3, 1);
         notesArea.setText(record.getNotes());
         notesArea.setPrefRowCount(6);
         notesArea.setMaxWidth(Double.MAX_VALUE);
