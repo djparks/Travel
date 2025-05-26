@@ -58,6 +58,7 @@ public class App extends Application {
         exportMenuItem.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Export Travel Records");
+            fileChooser.setInitialFileName("Travel.xml");
             fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml")
             );
@@ -86,6 +87,7 @@ public class App extends Application {
         importMenuItem.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Import Travel Records");
+            fileChooser.setInitialFileName("Travel.xml");
             fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml")
             );
@@ -300,6 +302,7 @@ public class App extends Application {
         reportButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Planned Visits Report");
+            fileChooser.setInitialFileName("TravelPlanned.docx");
             fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Word documents (*.docx)", "*.docx")
             );
