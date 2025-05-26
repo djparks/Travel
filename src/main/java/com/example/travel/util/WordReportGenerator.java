@@ -12,9 +12,9 @@ import java.util.List;
  * Utility class for generating Word reports of planned travel records.
  */
 public class WordReportGenerator {
-    
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    
+
     /**
      * Generates a Word document report containing all planned travel records.
      * 
@@ -25,7 +25,7 @@ public class WordReportGenerator {
         try {
             // Create a new document
             XWPFDocument document = new XWPFDocument();
-            
+
             // Add title
             XWPFParagraph titleParagraph = document.createParagraph();
             titleParagraph.setAlignment(ParagraphAlignment.CENTER);
@@ -34,13 +34,13 @@ public class WordReportGenerator {
             titleRun.setBold(true);
             titleRun.setFontSize(16);
             titleRun.addBreak();
-            
+
             try {
                 // Get all records where plan=true
                 List<TravelRecord> plannedRecords = TravelRecord.findAll().stream()
                         .filter(record -> Boolean.TRUE.equals(record.getPlan()))
                         .toList();
-                
+
                 if (plannedRecords.isEmpty()) {
                     XWPFParagraph noPlansParagraph = document.createParagraph();
                     XWPFRun noPlanRun = noPlansParagraph.createRun();
@@ -52,24 +52,24 @@ public class WordReportGenerator {
                         addRecordToDocument(document, record);
                     }
                 }
-                
+
             } catch (Exception e) {
                 XWPFParagraph errorParagraph = document.createParagraph();
                 XWPFRun errorRun = errorParagraph.createRun();
                 errorRun.setText("Error retrieving planned visits: " + e.getMessage());
                 errorRun.setColor("FF0000");
             }
-            
+
             // Write the document to file
             try (FileOutputStream out = new FileOutputStream(filePath)) {
                 document.write(out);
             }
-            
+
         } catch (Exception e) {
             throw new IOException("Failed to generate Word report: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Adds a travel record to the document.
      * 
@@ -85,11 +85,11 @@ public class WordReportGenerator {
         titleRun.setBold(true);
         titleRun.setFontSize(14);
         titleRun.addBreak();
-        
+
         // Add location information
         XWPFParagraph locationParagraph = document.createParagraph();
         XWPFRun locationRun = locationParagraph.createRun();
-        
+
         StringBuilder location = new StringBuilder();
         if (record.getAddress() != null && !record.getAddress().isEmpty()) {
             location.append(record.getAddress()).append(", ");
@@ -103,11 +103,11 @@ public class WordReportGenerator {
         if (record.getZip() != null && !record.getZip().isEmpty()) {
             location.append(record.getZip());
         }
-        
+
         locationRun.setText("Location: " + location.toString().trim());
         locationRun.setFontSize(12);
         locationRun.addBreak();
-        
+
         // Add URL if available
         if (record.getUrl() != null && !record.getUrl().isEmpty()) {
             XWPFRun urlRun = locationParagraph.createRun();
@@ -115,7 +115,15 @@ public class WordReportGenerator {
             urlRun.setFontSize(12);
             urlRun.addBreak();
         }
-        
+
+        // Add phone number if available
+        if (record.getPhoneNumber() != null && !record.getPhoneNumber().isEmpty()) {
+            XWPFRun phoneRun = locationParagraph.createRun();
+            phoneRun.setText("Phone: " + record.getPhoneNumber());
+            phoneRun.setFontSize(12);
+            phoneRun.addBreak();
+        }
+
         // Add geo information if available
         if (record.getGeo() != null && !record.getGeo().isEmpty()) {
             XWPFRun geoRun = locationParagraph.createRun();
@@ -123,7 +131,7 @@ public class WordReportGenerator {
             geoRun.setFontSize(12);
             geoRun.addBreak();
         }
-        
+
         // Add notes if available
         if (record.getNotes() != null && !record.getNotes().isEmpty()) {
             XWPFParagraph notesParagraph = document.createParagraph();
@@ -132,13 +140,13 @@ public class WordReportGenerator {
             notesLabelRun.setBold(true);
             notesLabelRun.setFontSize(12);
             notesLabelRun.addBreak();
-            
+
             XWPFRun notesContentRun = notesParagraph.createRun();
             notesContentRun.setText(record.getNotes());
             notesContentRun.setFontSize(12);
             notesContentRun.addBreak();
         }
-        
+
         // Add a separator
         XWPFParagraph separatorParagraph = document.createParagraph();
         XWPFRun separatorRun = separatorParagraph.createRun();
