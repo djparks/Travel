@@ -17,6 +17,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField cityField = new TextField();
     private final TextField addressField = new TextField();
     private final TextField zipField = new TextField();
+    private final TextField phoneNumberField = new TextField();
     private final TextField geoField = new TextField();
     private final ImageDropPane imageDropPane = new ImageDropPane();
     private final TextArea notesField = new TextArea();
@@ -55,20 +56,23 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("ZIP:"), 0, 4);
         grid.add(zipField, 1, 4);
 
-        grid.add(new Label("Geo:"), 2, 4);
-        grid.add(geoField, 3, 4);
+        grid.add(new Label("Phone:"), 2, 4);
+        grid.add(phoneNumberField, 3, 4);
 
-        grid.add(new Label("Picture:"), 0, 5);
-        grid.add(imageDropPane, 1, 5);
+        grid.add(new Label("Geo:"), 0, 5);
+        grid.add(geoField, 1, 5);
 
-        grid.add(new Label("Notes:"), 0, 6);
+        grid.add(new Label("Picture:"), 0, 6);
+        grid.add(imageDropPane, 1, 6);
+
+        grid.add(new Label("Notes:"), 0, 7);
         notesField.setPrefRowCount(2);
-        grid.add(notesField, 1, 6);
+        grid.add(notesField, 1, 7);
 
         // Add checkboxes for visited and plan
-        grid.add(new Label("Status:"), 0, 7);
-        grid.add(visitedCheckBox, 1, 7);
-        grid.add(planCheckBox, 2, 7);
+        grid.add(new Label("Status:"), 0, 8);
+        grid.add(visitedCheckBox, 1, 8);
+        grid.add(planCheckBox, 2, 8);
 
         getDialogPane().setContent(grid);
 
@@ -93,6 +97,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
                 record.setCity(cityField.getText());
                 record.setAddress(addressField.getText());
                 record.setZip(zipField.getText());
+                record.setPhoneNumber(phoneNumberField.getText());
                 record.setGeo(geoField.getText());
                 record.setPicture(imageDropPane.getImageData());
                 record.setNotes(notesField.getText());

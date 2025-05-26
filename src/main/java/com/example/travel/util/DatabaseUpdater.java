@@ -32,7 +32,7 @@ public class DatabaseUpdater {
                         throw e;
                     }
                 }
-                
+
                 // Add plan column if it doesn't exist
                 try {
                     stmt.execute("ALTER TABLE travel_records ADD COLUMN plan BOOLEAN DEFAULT FALSE NOT NULL");
@@ -41,6 +41,19 @@ public class DatabaseUpdater {
                     // Column might already exist, which is fine
                     if (e.getMessage().toLowerCase().contains("duplicate column name")) {
                         System.out.println("Column 'plan' already exists");
+                    } else {
+                        throw e;
+                    }
+                }
+
+                // Add phone_number column if it doesn't exist
+                try {
+                    stmt.execute("ALTER TABLE travel_records ADD COLUMN phone_number VARCHAR(20)");
+                    System.out.println("Added 'phone_number' column to travel_records table");
+                } catch (SQLException e) {
+                    // Column might already exist, which is fine
+                    if (e.getMessage().toLowerCase().contains("duplicate column name")) {
+                        System.out.println("Column 'phone_number' already exists");
                     } else {
                         throw e;
                     }

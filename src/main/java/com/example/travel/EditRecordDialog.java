@@ -17,6 +17,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
     private final TextField cityField = new TextField();
     private final TextField addressField = new TextField();
     private final TextField zipField = new TextField();
+    private final TextField phoneNumberField = new TextField();
     private final TextField geoField = new TextField();
     private final TextArea notesArea = new TextArea();
     private final ImageDropPane imageDropPane = new ImageDropPane();
@@ -46,6 +47,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         cityField.setText(record.getCity());
         addressField.setText(record.getAddress());
         zipField.setText(record.getZip());
+        phoneNumberField.setText(record.getPhoneNumber());
         geoField.setText(record.getGeo());
         notesArea.setText(record.getNotes());
         imageDropPane.setImageData(record.getPicture());
@@ -69,6 +71,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         cityField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         addressField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         zipField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        phoneNumberField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         geoField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         notesArea.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         imageDropPane.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
@@ -96,23 +99,27 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(zipField, 1, 5);
         zipField.setText(record.getZip());
 
-        grid.add(new Label("Geo:"), 0, 6);
-        grid.add(geoField, 1, 6);
+        grid.add(new Label("Phone:"), 0, 6);
+        grid.add(phoneNumberField, 1, 6);
+        phoneNumberField.setText(record.getPhoneNumber());
+
+        grid.add(new Label("Geo:"), 0, 7);
+        grid.add(geoField, 1, 7);
         geoField.setText(record.getGeo());
 
-        grid.add(new Label("Picture:"), 0, 7);
-        grid.add(imageDropPane, 1, 7);
+        grid.add(new Label("Picture:"), 0, 8);
+        grid.add(imageDropPane, 1, 8);
         imageDropPane.setImageData(record.getPicture());
 
-        grid.add(new Label("Notes:"), 0, 8);
-        grid.add(notesArea, 1, 8);
+        grid.add(new Label("Notes:"), 0, 9);
+        grid.add(notesArea, 1, 9);
         notesArea.setText(record.getNotes());
         notesArea.setPrefRowCount(3);
 
         // Add checkboxes for visited and plan
-        grid.add(new Label("Status:"), 0, 9);
-        grid.add(visitedCheckBox, 1, 9);
-        grid.add(planCheckBox, 2, 9);
+        grid.add(new Label("Status:"), 0, 10);
+        grid.add(visitedCheckBox, 1, 10);
+        grid.add(planCheckBox, 2, 10);
 
         getDialogPane().setContent(grid);
 
@@ -132,6 +139,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
                 record.setCity(cityField.getText());
                 record.setAddress(addressField.getText());
                 record.setZip(zipField.getText());
+                record.setPhoneNumber(phoneNumberField.getText());
                 record.setGeo(geoField.getText());
                 record.setNotes(notesArea.getText());
                 record.setPicture(imageDropPane.getImageData());
