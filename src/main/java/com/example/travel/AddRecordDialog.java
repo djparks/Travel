@@ -20,6 +20,8 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField geoField = new TextField();
     private final ImageDropPane imageDropPane = new ImageDropPane();
     private final TextArea notesField = new TextArea();
+    private final CheckBox visitedCheckBox = new CheckBox("Visited");
+    private final CheckBox planCheckBox = new CheckBox("Plan to Visit");
 
     public AddRecordDialog(Window owner) {
         setTitle("Add New Travel Record");
@@ -35,33 +37,38 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         // Add form fields
         grid.add(new Label("Description:*"), 0, 0);
         grid.add(descriptionField, 1, 0);
-        
+
         grid.add(new Label("URL:"), 2, 0);
         grid.add(urlField, 3, 0);
-        
+
         grid.add(new Label("State:"), 0, 1);
         stateComboBox.getItems().addAll(State.values());
         stateComboBox.setPromptText("Select a state");
         grid.add(stateComboBox, 1, 1);
-        
+
         grid.add(new Label("City:"), 0, 2);
         grid.add(cityField, 1, 2);
-        
+
         grid.add(new Label("Address:"), 0, 3);
         grid.add(addressField, 1, 3);
-        
+
         grid.add(new Label("ZIP:"), 0, 4);
         grid.add(zipField, 1, 4);
-        
+
         grid.add(new Label("Geo:"), 2, 4);
         grid.add(geoField, 3, 4);
-        
+
         grid.add(new Label("Picture:"), 0, 5);
         grid.add(imageDropPane, 1, 5);
-        
+
         grid.add(new Label("Notes:"), 0, 6);
         notesField.setPrefRowCount(2);
         grid.add(notesField, 1, 6);
+
+        // Add checkboxes for visited and plan
+        grid.add(new Label("Status:"), 0, 7);
+        grid.add(visitedCheckBox, 1, 7);
+        grid.add(planCheckBox, 2, 7);
 
         getDialogPane().setContent(grid);
 
@@ -89,6 +96,8 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
                 record.setGeo(geoField.getText());
                 record.setPicture(imageDropPane.getImageData());
                 record.setNotes(notesField.getText());
+                record.setVisited(visitedCheckBox.isSelected());
+                record.setPlan(planCheckBox.isSelected());
                 return record;
             }
             return null;

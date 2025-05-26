@@ -26,6 +26,28 @@ public class TravelRecord {
     @XmlTransient
     private static final String DB_PASSWORD = "";
 
+    // Execute this method to update the database schema
+    public static void updateDatabaseSchema() throws SQLException {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            try (Statement stmt = conn.createStatement()) {
+                // Check if columns exist before adding them
+                try {
+                    stmt.execute("SELECT visited FROM travel_records LIMIT 1");
+                } catch (SQLException e) {
+                    // Column doesn't exist, add it
+                    stmt.execute("ALTER TABLE travel_records ADD COLUMN visited BOOLEAN DEFAULT FALSE NOT NULL");
+                }
+
+                try {
+                    stmt.execute("SELECT plan FROM travel_records LIMIT 1");
+                } catch (SQLException e) {
+                    // Column doesn't exist, add it
+                    stmt.execute("ALTER TABLE travel_records ADD COLUMN plan BOOLEAN DEFAULT FALSE NOT NULL");
+                }
+            }
+        }
+    }
+
 
     @XmlElement
     private Long id;
@@ -55,6 +77,10 @@ public class TravelRecord {
     @XmlElement
     @XmlJavaTypeAdapter(value = LocalDateTimeAdapter.class)
     private LocalDateTime dateUpdated;
+    @XmlElement
+    private Boolean visited = false;
+    @XmlElement
+    private Boolean plan = false;
 
     public TravelRecord() {
         this.dateCreated = LocalDateTime.now();
@@ -80,7 +106,7 @@ public class TravelRecord {
         if (this.id == null) {
             // Create new record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, geo, picture, notes, date_created, date_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, geo, picture, notes, date_created, date_updated, visited, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -97,6 +123,8 @@ public class TravelRecord {
                     stmt.setString(9, notes);
                     stmt.setTimestamp(10, Timestamp.valueOf(dateCreated));
                     stmt.setTimestamp(11, Timestamp.valueOf(dateUpdated));
+                    stmt.setBoolean(12, visited != null ? visited : false);
+                    stmt.setBoolean(13, plan != null ? plan : false);
                     stmt.executeUpdate();
 
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -109,7 +137,7 @@ public class TravelRecord {
         } else {
             // Update existing record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "UPDATE travel_records SET description = ?, url = ?, state = ?, city = ?, address = ?, zip = ?, geo = ?, picture = ?, notes = ?, date_updated = ? WHERE id = ?";
+                String sql = "UPDATE travel_records SET description = ?, url = ?, state = ?, city = ?, address = ?, zip = ?, geo = ?, picture = ?, notes = ?, date_updated = ?, visited = ?, plan = ? WHERE id = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -125,7 +153,9 @@ public class TravelRecord {
                     }
                     stmt.setString(9, notes);
                     stmt.setTimestamp(10, Timestamp.valueOf(dateUpdated));
-                    stmt.setLong(11, id);
+                    stmt.setBoolean(11, visited != null ? visited : false);
+                    stmt.setBoolean(12, plan != null ? plan : false);
+                    stmt.setLong(13, id);
                     stmt.executeUpdate();
                 }
             }
@@ -192,6 +222,17 @@ public class TravelRecord {
         record.setNotes(rs.getString("notes"));
         record.dateCreated = rs.getTimestamp("date_created").toLocalDateTime();
         record.dateUpdated = rs.getTimestamp("date_updated").toLocalDateTime();
+
+        // Handle the new fields if they exist in the result set
+        try {
+            record.setVisited(rs.getBoolean("visited"));
+            record.setPlan(rs.getBoolean("plan"));
+        } catch (SQLException e) {
+            // If columns don't exist yet, use default values
+            record.setVisited(false);
+            record.setPlan(false);
+        }
+
         return record;
     }
 
@@ -294,5 +335,21 @@ public class TravelRecord {
 
     public void setDateUpdated(LocalDateTime dateUpdated) {
         this.dateUpdated = dateUpdated;
+    }
+
+    public Boolean getVisited() {
+        return visited;
+    }
+
+    public void setVisited(Boolean visited) {
+        this.visited = visited;
+    }
+
+    public Boolean getPlan() {
+        return plan;
+    }
+
+    public void setPlan(Boolean plan) {
+        this.plan = plan;
     }
 }

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import com.example.travel.util.XmlUtils;
+import com.example.travel.util.DatabaseUpdater;
 import com.example.travel.model.State;
 import com.example.travel.model.TravelRecord;
 
@@ -41,14 +42,14 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         initDatabase();
-        
+
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
-        
+
         // Create menu bar
         MenuBar menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
-        
+
         MenuItem exportMenuItem = new MenuItem("Export to XML");
         exportMenuItem.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
@@ -76,7 +77,7 @@ public class App extends Application {
                 }
             }
         });
-        
+
         MenuItem importMenuItem = new MenuItem("Import from XML");
         importMenuItem.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
@@ -104,7 +105,7 @@ public class App extends Application {
                 }
             }
         });
-        
+
         fileMenu.getItems().addAll(exportMenuItem, importMenuItem);
         menuBar.getMenus().add(fileMenu);
         root.setTop(menuBar);
@@ -124,7 +125,7 @@ public class App extends Application {
             });
             return row;
         });
-        
+
         // Configure table properties
         table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         table.setMinWidth(800);
@@ -134,7 +135,7 @@ public class App extends Application {
         scrollPane.setFitToHeight(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        
+
         // Create a VBox to hold the ScrollPane and allow it to grow
         VBox tableContainer = new VBox(scrollPane);
         VBox.setVgrow(tableContainer, Priority.ALWAYS);
@@ -183,6 +184,18 @@ public class App extends Application {
         geoCol.setMinWidth(200);
         geoCol.setResizable(true);
 
+        TableColumn<TravelRecord, Boolean> visitedCol = new TableColumn<>("Visited");
+        visitedCol.setCellValueFactory(new PropertyValueFactory<>("visited"));
+        visitedCol.setPrefWidth(80);
+        visitedCol.setMinWidth(80);
+        visitedCol.setResizable(true);
+
+        TableColumn<TravelRecord, Boolean> planCol = new TableColumn<>("Plan");
+        planCol.setCellValueFactory(new PropertyValueFactory<>("plan"));
+        planCol.setPrefWidth(80);
+        planCol.setMinWidth(80);
+        planCol.setResizable(true);
+
         table.getColumns().add(descCol);
         table.getColumns().add(urlCol);
         table.getColumns().add(stateCol);
@@ -190,6 +203,8 @@ public class App extends Application {
         table.getColumns().add(addressCol);
         table.getColumns().add(zipCol);
         table.getColumns().add(geoCol);
+        table.getColumns().add(visitedCol);
+        table.getColumns().add(planCol);
         table.getSortOrder().add(descCol); // Default sort by description
 
         // Filter fields
@@ -199,11 +214,11 @@ public class App extends Application {
         stateFilter.setPromptText("Filter by state...");
         stateFilter.getItems().addAll(State.values());
         stateFilter.getItems().add(0, null); // Add null option for "All states"
-        
+
         // Add filter listeners
         descriptionFilter.textProperty().addListener((obs, oldVal, newVal) -> applyFilters(descriptionFilter, stateFilter));
         stateFilter.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters(descriptionFilter, stateFilter));
-        
+
         HBox filterBox = new HBox(10);
         filterBox.getChildren().addAll(
             new Label("Description:"), descriptionFilter,
@@ -274,12 +289,12 @@ public class App extends Application {
 
         VBox centerBox = new VBox(10);
         centerBox.getChildren().addAll(filterBox, tableContainer);
-        
+
         root.setCenter(centerBox);
         root.setBottom(buttonBox);
 
         Scene scene = new Scene(root, 1024, 768);
-        
+
         // Make the window responsive
         stage.setMinWidth(800);
         stage.setMinHeight(600);
@@ -296,7 +311,7 @@ public class App extends Application {
             // Create new table with proper BLOB column
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             Statement stmt = connection.createStatement();
-            
+
             // Create travel records table if it doesn't exist
             stmt.execute("CREATE TABLE IF NOT EXISTS travel_records ("
                 + "id BIGINT PRIMARY KEY AUTO_INCREMENT,"
@@ -310,10 +325,15 @@ public class App extends Application {
                 + "picture BLOB,"
                 + "notes TEXT,"
                 + "date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-                + "date_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
+                + "date_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                + "visited BOOLEAN DEFAULT FALSE NOT NULL,"
+                + "plan BOOLEAN DEFAULT FALSE NOT NULL"
                 + ")");
-            
+
             stmt.close();
+
+            // Update database schema if needed (for existing databases)
+            DatabaseUpdater.updateSchema();
         } catch (Exception e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -371,7 +391,7 @@ public class App extends Application {
     private void applyFilters(TextField descriptionFilter, ComboBox<State> stateFilter) {
         String descriptionText = descriptionFilter.getText().toLowerCase().trim();
         State selectedState = stateFilter.getValue();
-        
+
         try {
             List<TravelRecord> allRecords = TravelRecord.findAll();
             List<TravelRecord> filteredRecords = allRecords.stream()
@@ -383,7 +403,7 @@ public class App extends Application {
                       record.getState().equals(selectedState.name())))
                 )
                 .collect(Collectors.toList());
-            
+
             table.setItems(FXCollections.observableArrayList(filteredRecords));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -394,7 +414,7 @@ public class App extends Application {
             alert.showAndWait();
         }
     }
-    
+
     private void refreshTableData() {
         try {
             records.clear();

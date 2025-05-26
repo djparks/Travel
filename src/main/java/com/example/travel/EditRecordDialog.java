@@ -20,6 +20,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
     private final TextField geoField = new TextField();
     private final TextArea notesArea = new TextArea();
     private final ImageDropPane imageDropPane = new ImageDropPane();
+    private final CheckBox visitedCheckBox = new CheckBox("Visited");
+    private final CheckBox planCheckBox = new CheckBox("Plan to Visit");
     private final TravelRecord record;  // Used to initialize dialog fields and for validation
 
     private boolean hasChanges = false;
@@ -47,6 +49,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         geoField.setText(record.getGeo());
         notesArea.setText(record.getNotes());
         imageDropPane.setImageData(record.getPicture());
+        visitedCheckBox.setSelected(record.getVisited() != null ? record.getVisited() : false);
+        planCheckBox.setSelected(record.getPlan() != null ? record.getPlan() : false);
 
         // Initialize state combobox
         stateComboBox.getItems().addAll(State.values());
@@ -68,6 +72,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         geoField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         notesArea.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         imageDropPane.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        visitedCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        planCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
 
         grid.add(new Label("Description:*"), 0, 0);
         grid.add(descriptionField, 1, 0);
@@ -103,6 +109,11 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         notesArea.setText(record.getNotes());
         notesArea.setPrefRowCount(3);
 
+        // Add checkboxes for visited and plan
+        grid.add(new Label("Status:"), 0, 9);
+        grid.add(visitedCheckBox, 1, 9);
+        grid.add(planCheckBox, 2, 9);
+
         getDialogPane().setContent(grid);
 
         // Add buttons
@@ -124,6 +135,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
                 record.setGeo(geoField.getText());
                 record.setNotes(notesArea.getText());
                 record.setPicture(imageDropPane.getImageData());
+                record.setVisited(visitedCheckBox.isSelected());
+                record.setPlan(planCheckBox.isSelected());
                 return record;
             }
             return null;
