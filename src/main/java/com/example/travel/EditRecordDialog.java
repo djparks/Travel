@@ -114,7 +114,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("Notes:"), 0, 9);
         grid.add(notesArea, 1, 9);
         notesArea.setText(record.getNotes());
-        notesArea.setPrefRowCount(3);
+        notesArea.setPrefRowCount(6);
+        notesArea.setMaxWidth(Double.MAX_VALUE);
 
         // Add checkboxes for visited and plan
         grid.add(new Label("Status:"), 0, 10);
