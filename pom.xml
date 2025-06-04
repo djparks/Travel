@@ -82,6 +82,29 @@
                     <mainClass>com.example.travel.App</mainClass>
                 </configuration>
             </plugin>
+            <!-- Maven Shade Plugin for creating an uber jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.example.travel.App</mainClass>
+                                </transformer>
+                            </transformers>
+                            <finalName>${project.artifactId}-${project.version}-uber</finalName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- We'll use Launch4j separately to create an executable - see README.md for instructions -->
         </plugins>
     </build>
 </project>

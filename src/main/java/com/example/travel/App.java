@@ -46,6 +46,14 @@ public class App extends Application {
     public void start(Stage stage) {
         initDatabase();
 
+        // Set custom application icon
+        try {
+            javafx.scene.image.Image icon = new javafx.scene.image.Image(getClass().getResourceAsStream("/travel-icon.png"));
+            stage.getIcons().add(icon);
+        } catch (Exception e) {
+            System.err.println("Could not load application icon: " + e.getMessage());
+        }
+
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(10));
 
