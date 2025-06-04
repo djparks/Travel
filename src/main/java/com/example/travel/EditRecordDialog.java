@@ -17,6 +17,13 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
     private final ComboBox<State> stateComboBox = new ComboBox<>();
     private final TextField cityField = new TextField();
     private final TextField addressField = new TextField();
+
+    // Set preferred column counts for wider display
+    {
+        descriptionField.setPrefColumnCount(30);
+        urlField.setPrefColumnCount(30);
+        addressField.setPrefColumnCount(30);
+    }
     private final TextField zipField = new TextField();
     private final TextField phoneNumberField = new TextField();
     private final TextField geoField = new TextField();
