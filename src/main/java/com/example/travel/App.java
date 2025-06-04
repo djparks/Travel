@@ -28,6 +28,7 @@ import com.example.travel.util.XmlUtils;
 import com.example.travel.util.DatabaseUpdater;
 import com.example.travel.util.WordReportGenerator;
 import com.example.travel.model.State;
+import com.example.travel.model.Tag;
 import com.example.travel.model.TravelRecord;
 
 public class App extends Application {
@@ -40,6 +41,7 @@ public class App extends Application {
     private Connection connection;
     private TextField descriptionFilter;
     private ComboBox<State> stateFilter;
+    private ComboBox<String> tagFilter;
     private CheckBox hideVisitedFilter;
 
     @Override
@@ -237,22 +239,43 @@ public class App extends Application {
         stateFilter.getItems().addAll(State.values());
         stateFilter.getItems().add(0, null); // Add null option for "All states"
 
+        // Tag filter
+        tagFilter = new ComboBox<>();
+        tagFilter.setPromptText("Filter by tag...");
+        try {
+            List<Tag> tags = Tag.findAll();
+            for (Tag tag : tags) {
+                tagFilter.getItems().add(tag.getTag());
+            }
+            tagFilter.getItems().add(0, null); // Add null option for "All tags"
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Could not load tags");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+
         // Add Hide Visited checkbox
         hideVisitedFilter = new CheckBox("Hide Visited");
         hideVisitedFilter.setSelected(true); // Set to checked by default
 
         // Add filter listeners
         descriptionFilter.textProperty().addListener((obs, oldVal, newVal) -> 
-            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter));
+            applyFilters(descriptionFilter, stateFilter, tagFilter, hideVisitedFilter));
         stateFilter.valueProperty().addListener((obs, oldVal, newVal) -> 
-            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter));
+            applyFilters(descriptionFilter, stateFilter, tagFilter, hideVisitedFilter));
+        tagFilter.valueProperty().addListener((obs, oldVal, newVal) -> 
+            applyFilters(descriptionFilter, stateFilter, tagFilter, hideVisitedFilter));
         hideVisitedFilter.selectedProperty().addListener((obs, oldVal, newVal) -> 
-            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter));
+            applyFilters(descriptionFilter, stateFilter, tagFilter, hideVisitedFilter));
 
         HBox filterBox = new HBox(10);
         filterBox.getChildren().addAll(
             new Label("Description:"), descriptionFilter,
             new Label("State:"), stateFilter,
+            new Label("Tag:"), tagFilter,
             hideVisitedFilter
         );
         filterBox.setAlignment(Pos.CENTER_LEFT);
@@ -283,7 +306,7 @@ public class App extends Application {
                     if (response == ButtonType.OK) {
                         try {
                             selectedRecord.delete();
-                            applyFilters(descriptionFilter, stateFilter, hideVisitedFilter); // Refresh with filters
+                            applyFilters(descriptionFilter, stateFilter, tagFilter, hideVisitedFilter); // Refresh with filters
                         } catch (SQLException ex) {
                             ex.printStackTrace();
                             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -453,9 +476,10 @@ public class App extends Application {
         });
     }
 
-    private void applyFilters(TextField descriptionFilter, ComboBox<State> stateFilter, CheckBox hideVisitedFilter) {
+    private void applyFilters(TextField descriptionFilter, ComboBox<State> stateFilter, ComboBox<String> tagFilter, CheckBox hideVisitedFilter) {
         String descriptionText = descriptionFilter.getText().toLowerCase().trim();
         State selectedState = stateFilter.getValue();
+        String selectedTag = tagFilter.getValue();
         boolean hideVisited = hideVisitedFilter.isSelected();
 
         try {
@@ -467,6 +491,9 @@ public class App extends Application {
                     (selectedState == null || 
                      (record.getState() != null && 
                       record.getState().equals(selectedState.name()))) &&
+                    (selectedTag == null ||
+                     (record.getTag() != null &&
+                      record.getTag().equals(selectedTag))) &&
                     (!hideVisited || record.getVisited() == null || !record.getVisited())
                 )
                 .collect(Collectors.toList());
@@ -485,8 +512,8 @@ public class App extends Application {
     private void refreshTableData() {
         try {
             // Instead of just loading all records, apply the current filters
-            if (descriptionFilter != null && stateFilter != null && hideVisitedFilter != null) {
-                applyFilters(descriptionFilter, stateFilter, hideVisitedFilter);
+            if (descriptionFilter != null && stateFilter != null && tagFilter != null && hideVisitedFilter != null) {
+                applyFilters(descriptionFilter, stateFilter, tagFilter, hideVisitedFilter);
             } else {
                 // This will only happen before the UI is fully initialized
                 records.clear();
