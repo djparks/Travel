@@ -99,7 +99,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(planCheckBox, 2, 8);
 
         // Add tag combobox
-        grid.add(new Label("Tag:"), 0, 9);
+        grid.add(new Label("Tag:"), 2, 3);
 
         // Load tags from database
         try {
@@ -118,7 +118,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         }
 
         tagComboBox.setPromptText("Select a tag");
-        grid.add(tagComboBox, 1, 9);
+        grid.add(tagComboBox, 3, 3);
 
         getDialogPane().setContent(grid);
 

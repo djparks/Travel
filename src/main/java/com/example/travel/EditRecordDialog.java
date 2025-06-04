@@ -170,8 +170,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(planCheckBox, 2, 9);
 
         // Add tag combobox
-        grid.add(new Label("Tag:"), 0, 10);
-        grid.add(tagComboBox, 1, 10);
+        grid.add(new Label("Tag:"), 2, 4);
+        grid.add(tagComboBox, 3, 4);
 
         getDialogPane().setContent(grid);
 

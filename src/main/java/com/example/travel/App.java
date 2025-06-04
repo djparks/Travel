@@ -218,6 +218,7 @@ public class App extends Application {
         tagCol.setResizable(true);
 
         table.getColumns().add(descCol);
+        table.getColumns().add(tagCol);
         table.getColumns().add(urlCol);
         table.getColumns().add(stateCol);
         table.getColumns().add(cityCol);
@@ -226,7 +227,6 @@ public class App extends Application {
         table.getColumns().add(geoCol);
         table.getColumns().add(visitedCol);
         table.getColumns().add(planCol);
-        table.getColumns().add(tagCol);
         table.getSortOrder().add(descCol); // Default sort by description
 
         // Filter fields
