@@ -20,6 +20,8 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField phoneNumberField = new TextField();
     private final TextField geoField = new TextField();
     private final ImageDropPane imageDropPane = new ImageDropPane();
+    private final ImageDropPane imageDropPane2 = new ImageDropPane();
+    private final ImageDropPane imageDropPane3 = new ImageDropPane();
     private final TextArea notesField = new TextArea();
     private final CheckBox visitedCheckBox = new CheckBox("Visited");
     private final CheckBox planCheckBox = new CheckBox("Plan to Visit");
@@ -64,8 +66,17 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(new Label("Geo:"), 0, 5);
         grid.add(geoField, 1, 5);
 
-        grid.add(new Label("Picture:"), 0, 6);
+        grid.add(new Label("Pictures:"), 0, 6);
+
+        // Set a smaller size for each image pane
+        imageDropPane.setPrefSize(150, 150);
+        imageDropPane2.setPrefSize(150, 150);
+        imageDropPane3.setPrefSize(150, 150);
+
+        // Add each image pane to the grid
         grid.add(imageDropPane, 1, 6);
+        grid.add(imageDropPane2, 2, 6);
+        grid.add(imageDropPane3, 3, 6);
 
         grid.add(new Label("Notes:"), 0, 7);
         notesField.setPrefRowCount(6);
@@ -103,6 +114,8 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
                 record.setPhoneNumber(phoneNumberField.getText());
                 record.setGeo(geoField.getText());
                 record.setPicture(imageDropPane.getImageData());
+                record.setPicture2(imageDropPane2.getImageData());
+                record.setPicture3(imageDropPane3.getImageData());
                 record.setNotes(notesField.getText());
                 record.setVisited(visitedCheckBox.isSelected());
                 record.setPlan(planCheckBox.isSelected());

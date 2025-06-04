@@ -7,6 +7,7 @@ import javafx.stage.Modality;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import com.example.travel.components.ImageDropPane;
 
@@ -21,6 +22,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
     private final TextField geoField = new TextField();
     private final TextArea notesArea = new TextArea();
     private final ImageDropPane imageDropPane = new ImageDropPane();
+    private final ImageDropPane imageDropPane2 = new ImageDropPane();
+    private final ImageDropPane imageDropPane3 = new ImageDropPane();
     private final CheckBox visitedCheckBox = new CheckBox("Visited");
     private final CheckBox planCheckBox = new CheckBox("Plan to Visit");
     private final TravelRecord record;  // Used to initialize dialog fields and for validation
@@ -51,6 +54,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         geoField.setText(record.getGeo());
         notesArea.setText(record.getNotes());
         imageDropPane.setImageData(record.getPicture());
+        imageDropPane2.setImageData(record.getPicture2());
+        imageDropPane3.setImageData(record.getPicture3());
         visitedCheckBox.setSelected(record.getVisited() != null ? record.getVisited() : false);
         planCheckBox.setSelected(record.getPlan() != null ? record.getPlan() : false);
 
@@ -75,6 +80,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         geoField.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         notesArea.textProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         imageDropPane.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        imageDropPane2.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        imageDropPane3.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         visitedCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         planCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
 
@@ -109,9 +116,17 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(geoField, 1, 6);
         geoField.setText(record.getGeo());
 
-        grid.add(new Label("Picture:"), 0, 7);
+        grid.add(new Label("Pictures:"), 0, 7);
+
+        // Set a smaller size for each image pane
+        imageDropPane.setPrefSize(150, 150);
+        imageDropPane2.setPrefSize(150, 150);
+        imageDropPane3.setPrefSize(150, 150);
+
+        // Add each image pane to the grid
         grid.add(imageDropPane, 1, 7);
-        imageDropPane.setImageData(record.getPicture());
+        grid.add(imageDropPane2, 2, 7);
+        grid.add(imageDropPane3, 3, 7);
 
         grid.add(new Label("Notes:"), 0, 8);
         grid.add(notesArea, 1, 8, 3, 1);
@@ -146,6 +161,8 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
                 record.setGeo(geoField.getText());
                 record.setNotes(notesArea.getText());
                 record.setPicture(imageDropPane.getImageData());
+                record.setPicture2(imageDropPane2.getImageData());
+                record.setPicture3(imageDropPane3.getImageData());
                 record.setVisited(visitedCheckBox.isSelected());
                 record.setPlan(planCheckBox.isSelected());
                 return record;

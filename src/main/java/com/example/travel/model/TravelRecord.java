@@ -44,6 +44,24 @@ public class TravelRecord {
                     // Column doesn't exist, add it
                     stmt.execute("ALTER TABLE travel_records ADD COLUMN plan BOOLEAN DEFAULT FALSE NOT NULL");
                 }
+
+                // Add picture2 column if it doesn't exist
+                try {
+                    stmt.execute("SELECT picture2 FROM travel_records LIMIT 1");
+                } catch (SQLException e) {
+                    // Column doesn't exist, add it
+                    stmt.execute("ALTER TABLE travel_records ADD COLUMN picture2 BLOB");
+                    System.out.println("Added 'picture2' column to travel_records table");
+                }
+
+                // Add picture3 column if it doesn't exist
+                try {
+                    stmt.execute("SELECT picture3 FROM travel_records LIMIT 1");
+                } catch (SQLException e) {
+                    // Column doesn't exist, add it
+                    stmt.execute("ALTER TABLE travel_records ADD COLUMN picture3 BLOB");
+                    System.out.println("Added 'picture3' column to travel_records table");
+                }
             }
         }
     }
@@ -69,8 +87,16 @@ public class TravelRecord {
     private String geo;
     @XmlTransient
     private byte[] picture;
+    @XmlTransient
+    private byte[] picture2;
+    @XmlTransient
+    private byte[] picture3;
     @XmlElement
     private String pictureFileName;
+    @XmlElement
+    private String pictureFileName2;
+    @XmlElement
+    private String pictureFileName3;
     @XmlElement
     private String notes;
     @XmlElement
@@ -108,7 +134,7 @@ public class TravelRecord {
         if (this.id == null) {
             // Create new record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, phone_number, geo, picture, notes, date_created, date_updated, visited, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, phone_number, geo, picture, picture2, picture3, notes, date_created, date_updated, visited, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -118,16 +144,33 @@ public class TravelRecord {
                     stmt.setString(6, zip);
                     stmt.setString(7, phoneNumber);
                     stmt.setString(8, geo);
+
+                    // Handle picture 1
                     if (picture != null && picture.length > 0) {
                         stmt.setBlob(9, new SerialBlob(picture));
                     } else {
                         stmt.setNull(9, java.sql.Types.BLOB);
                     }
-                    stmt.setString(10, notes);
-                    stmt.setTimestamp(11, Timestamp.valueOf(dateCreated));
-                    stmt.setTimestamp(12, Timestamp.valueOf(dateUpdated));
-                    stmt.setBoolean(13, visited != null ? visited : false);
-                    stmt.setBoolean(14, plan != null ? plan : false);
+
+                    // Handle picture 2
+                    if (picture2 != null && picture2.length > 0) {
+                        stmt.setBlob(10, new SerialBlob(picture2));
+                    } else {
+                        stmt.setNull(10, java.sql.Types.BLOB);
+                    }
+
+                    // Handle picture 3
+                    if (picture3 != null && picture3.length > 0) {
+                        stmt.setBlob(11, new SerialBlob(picture3));
+                    } else {
+                        stmt.setNull(11, java.sql.Types.BLOB);
+                    }
+
+                    stmt.setString(12, notes);
+                    stmt.setTimestamp(13, Timestamp.valueOf(dateCreated));
+                    stmt.setTimestamp(14, Timestamp.valueOf(dateUpdated));
+                    stmt.setBoolean(15, visited != null ? visited : false);
+                    stmt.setBoolean(16, plan != null ? plan : false);
                     stmt.executeUpdate();
 
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -140,7 +183,7 @@ public class TravelRecord {
         } else {
             // Update existing record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "UPDATE travel_records SET description = ?, url = ?, state = ?, city = ?, address = ?, zip = ?, phone_number = ?, geo = ?, picture = ?, notes = ?, date_updated = ?, visited = ?, plan = ? WHERE id = ?";
+                String sql = "UPDATE travel_records SET description = ?, url = ?, state = ?, city = ?, address = ?, zip = ?, phone_number = ?, geo = ?, picture = ?, picture2 = ?, picture3 = ?, notes = ?, date_updated = ?, visited = ?, plan = ? WHERE id = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -150,16 +193,33 @@ public class TravelRecord {
                     stmt.setString(6, zip);
                     stmt.setString(7, phoneNumber);
                     stmt.setString(8, geo);
+
+                    // Handle picture 1
                     if (picture != null && picture.length > 0) {
                         stmt.setBlob(9, new SerialBlob(picture));
                     } else {
                         stmt.setNull(9, Types.BLOB);
                     }
-                    stmt.setString(10, notes);
-                    stmt.setTimestamp(11, Timestamp.valueOf(dateUpdated));
-                    stmt.setBoolean(12, visited != null ? visited : false);
-                    stmt.setBoolean(13, plan != null ? plan : false);
-                    stmt.setLong(14, id);
+
+                    // Handle picture 2
+                    if (picture2 != null && picture2.length > 0) {
+                        stmt.setBlob(10, new SerialBlob(picture2));
+                    } else {
+                        stmt.setNull(10, Types.BLOB);
+                    }
+
+                    // Handle picture 3
+                    if (picture3 != null && picture3.length > 0) {
+                        stmt.setBlob(11, new SerialBlob(picture3));
+                    } else {
+                        stmt.setNull(11, Types.BLOB);
+                    }
+
+                    stmt.setString(12, notes);
+                    stmt.setTimestamp(13, Timestamp.valueOf(dateUpdated));
+                    stmt.setBoolean(14, visited != null ? visited : false);
+                    stmt.setBoolean(15, plan != null ? plan : false);
+                    stmt.setLong(16, id);
                     stmt.executeUpdate();
                 }
             }
@@ -225,12 +285,41 @@ public class TravelRecord {
             // If column doesn't exist yet, use default value
             record.setPhoneNumber(null);
         }
+
+        // Handle picture 1
         java.sql.Blob blob = rs.getBlob("picture");
         if (blob != null) {
             record.setPicture(blob.getBytes(1, (int) blob.length()));
         } else {
             record.setPicture(null);
         }
+
+        // Handle picture 2 if it exists
+        try {
+            java.sql.Blob blob2 = rs.getBlob("picture2");
+            if (blob2 != null) {
+                record.setPicture2(blob2.getBytes(1, (int) blob2.length()));
+            } else {
+                record.setPicture2(null);
+            }
+        } catch (SQLException e) {
+            // If column doesn't exist yet, use default value
+            record.setPicture2(null);
+        }
+
+        // Handle picture 3 if it exists
+        try {
+            java.sql.Blob blob3 = rs.getBlob("picture3");
+            if (blob3 != null) {
+                record.setPicture3(blob3.getBytes(1, (int) blob3.length()));
+            } else {
+                record.setPicture3(null);
+            }
+        } catch (SQLException e) {
+            // If column doesn't exist yet, use default value
+            record.setPicture3(null);
+        }
+
         record.setNotes(rs.getString("notes"));
         record.dateCreated = rs.getTimestamp("date_created").toLocalDateTime();
         record.dateUpdated = rs.getTimestamp("date_updated").toLocalDateTime();
@@ -321,12 +410,44 @@ public class TravelRecord {
         this.picture = picture;
     }
 
+    public byte[] getPicture2() {
+        return picture2;
+    }
+
+    public void setPicture2(byte[] picture2) {
+        this.picture2 = picture2;
+    }
+
+    public byte[] getPicture3() {
+        return picture3;
+    }
+
+    public void setPicture3(byte[] picture3) {
+        this.picture3 = picture3;
+    }
+
     public String getPictureFileName() {
         return pictureFileName;
     }
 
     public void setPictureFileName(String pictureFileName) {
         this.pictureFileName = pictureFileName;
+    }
+
+    public String getPictureFileName2() {
+        return pictureFileName2;
+    }
+
+    public void setPictureFileName2(String pictureFileName2) {
+        this.pictureFileName2 = pictureFileName2;
+    }
+
+    public String getPictureFileName3() {
+        return pictureFileName3;
+    }
+
+    public void setPictureFileName3(String pictureFileName3) {
+        this.pictureFileName3 = pictureFileName3;
     }
 
     public String getNotes() {

@@ -368,6 +368,8 @@ public class App extends Application {
                 + "zip VARCHAR(10),"
                 + "geo VARCHAR(255),"
                 + "picture BLOB,"
+                + "picture2 BLOB,"
+                + "picture3 BLOB,"
                 + "notes TEXT,"
                 + "date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
                 + "date_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
@@ -379,6 +381,9 @@ public class App extends Application {
 
             // Update database schema if needed (for existing databases)
             DatabaseUpdater.updateSchema();
+
+            // Update TravelRecord schema to add picture2 and picture3 columns
+            TravelRecord.updateDatabaseSchema();
         } catch (Exception e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
