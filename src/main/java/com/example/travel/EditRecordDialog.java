@@ -10,6 +10,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import com.example.travel.components.ImageDropPane;
+import java.sql.SQLException;
+import java.util.List;
 
 public class EditRecordDialog extends Dialog<TravelRecord> {
     private final TextField descriptionField = new TextField();
@@ -33,6 +35,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
     private final ImageDropPane imageDropPane3 = new ImageDropPane();
     private final CheckBox visitedCheckBox = new CheckBox("Visited");
     private final CheckBox planCheckBox = new CheckBox("Plan to Visit");
+    private final ComboBox<String> tagComboBox = new ComboBox<>();
     private final TravelRecord record;  // Used to initialize dialog fields and for validation
 
     private boolean hasChanges = false;
@@ -66,6 +69,25 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         visitedCheckBox.setSelected(record.getVisited() != null ? record.getVisited() : false);
         planCheckBox.setSelected(record.getPlan() != null ? record.getPlan() : false);
 
+        // Initialize tag combobox with tags from database
+        try {
+            // Always add an empty option
+            tagComboBox.getItems().add("");
+
+            // Add all tags from the database
+            List<com.example.travel.model.Tag> tagList = com.example.travel.model.Tag.findAll();
+            for (com.example.travel.model.Tag tag : tagList) {
+                tagComboBox.getItems().add(tag.getTag());
+            }
+
+            tagComboBox.setValue(record.getTag());
+        } catch (SQLException e) {
+            System.err.println("Error loading tags: " + e.getMessage());
+            // Fallback to empty tag list
+            tagComboBox.getItems().add("");
+            tagComboBox.setValue("");
+        }
+
         // Initialize state combobox
         stateComboBox.getItems().addAll(State.values());
         if (record.getState() != null && !record.getState().isEmpty()) {
@@ -91,6 +113,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         imageDropPane3.imageDataProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         visitedCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
         planCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
+        tagComboBox.valueProperty().addListener((obs, oldVal, newVal) -> setHasChanges(true));
 
         grid.add(new Label("Description:*"), 0, 0);
         grid.add(descriptionField, 1, 0);
@@ -146,6 +169,10 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
         grid.add(visitedCheckBox, 1, 9);
         grid.add(planCheckBox, 2, 9);
 
+        // Add tag combobox
+        grid.add(new Label("Tag:"), 0, 10);
+        grid.add(tagComboBox, 1, 10);
+
         getDialogPane().setContent(grid);
 
         // Add buttons
@@ -172,6 +199,7 @@ public class EditRecordDialog extends Dialog<TravelRecord> {
                 record.setPicture3(imageDropPane3.getImageData());
                 record.setVisited(visitedCheckBox.isSelected());
                 record.setPlan(planCheckBox.isSelected());
+                record.setTag(tagComboBox.getValue());
                 return record;
             }
             return null;

@@ -62,6 +62,15 @@ public class TravelRecord {
                     stmt.execute("ALTER TABLE travel_records ADD COLUMN picture3 BLOB");
                     System.out.println("Added 'picture3' column to travel_records table");
                 }
+
+                // Add tag column if it doesn't exist
+                try {
+                    stmt.execute("SELECT tag FROM travel_records LIMIT 1");
+                } catch (SQLException e) {
+                    // Column doesn't exist, add it
+                    stmt.execute("ALTER TABLE travel_records ADD COLUMN tag VARCHAR(50)");
+                    System.out.println("Added 'tag' column to travel_records table");
+                }
             }
         }
     }
@@ -109,6 +118,8 @@ public class TravelRecord {
     private Boolean visited = false;
     @XmlElement
     private Boolean plan = false;
+    @XmlElement
+    private String tag;
 
     public TravelRecord() {
         this.dateCreated = LocalDateTime.now();
@@ -134,7 +145,7 @@ public class TravelRecord {
         if (this.id == null) {
             // Create new record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, phone_number, geo, picture, picture2, picture3, notes, date_created, date_updated, visited, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO travel_records (description, url, state, city, address, zip, phone_number, geo, picture, picture2, picture3, notes, date_created, date_updated, visited, plan, tag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -171,6 +182,7 @@ public class TravelRecord {
                     stmt.setTimestamp(14, Timestamp.valueOf(dateUpdated));
                     stmt.setBoolean(15, visited != null ? visited : false);
                     stmt.setBoolean(16, plan != null ? plan : false);
+                    stmt.setString(17, tag);
                     stmt.executeUpdate();
 
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -183,7 +195,7 @@ public class TravelRecord {
         } else {
             // Update existing record
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-                String sql = "UPDATE travel_records SET description = ?, url = ?, state = ?, city = ?, address = ?, zip = ?, phone_number = ?, geo = ?, picture = ?, picture2 = ?, picture3 = ?, notes = ?, date_updated = ?, visited = ?, plan = ? WHERE id = ?";
+                String sql = "UPDATE travel_records SET description = ?, url = ?, state = ?, city = ?, address = ?, zip = ?, phone_number = ?, geo = ?, picture = ?, picture2 = ?, picture3 = ?, notes = ?, date_updated = ?, visited = ?, plan = ?, tag = ? WHERE id = ?";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, description);
                     stmt.setString(2, url);
@@ -219,7 +231,8 @@ public class TravelRecord {
                     stmt.setTimestamp(13, Timestamp.valueOf(dateUpdated));
                     stmt.setBoolean(14, visited != null ? visited : false);
                     stmt.setBoolean(15, plan != null ? plan : false);
-                    stmt.setLong(16, id);
+                    stmt.setString(16, tag);
+                    stmt.setLong(17, id);
                     stmt.executeUpdate();
                 }
             }
@@ -332,6 +345,14 @@ public class TravelRecord {
             // If columns don't exist yet, use default values
             record.setVisited(false);
             record.setPlan(false);
+        }
+
+        // Handle tag field if it exists
+        try {
+            record.setTag(rs.getString("tag"));
+        } catch (SQLException e) {
+            // If column doesn't exist yet, use default value
+            record.setTag(null);
         }
 
         return record;
@@ -492,5 +513,13 @@ public class TravelRecord {
 
     public void setPlan(Boolean plan) {
         this.plan = plan;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

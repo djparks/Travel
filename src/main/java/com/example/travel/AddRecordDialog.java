@@ -9,6 +9,8 @@ import com.example.travel.components.ImageDropPane;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 import javafx.scene.Node;
+import java.sql.SQLException;
+import java.util.List;
 
 public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextField descriptionField = new TextField();
@@ -32,6 +34,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
     private final TextArea notesField = new TextArea();
     private final CheckBox visitedCheckBox = new CheckBox("Visited");
     private final CheckBox planCheckBox = new CheckBox("Plan to Visit");
+    private final ComboBox<String> tagComboBox = new ComboBox<>();
 
     public AddRecordDialog(Window owner) {
         setTitle("Add New Travel Record");
@@ -95,6 +98,28 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
         grid.add(visitedCheckBox, 1, 8);
         grid.add(planCheckBox, 2, 8);
 
+        // Add tag combobox
+        grid.add(new Label("Tag:"), 0, 9);
+
+        // Load tags from database
+        try {
+            // Always add an empty option
+            tagComboBox.getItems().add("");
+
+            // Add all tags from the database
+            List<com.example.travel.model.Tag> tagList = com.example.travel.model.Tag.findAll();
+            for (com.example.travel.model.Tag tag : tagList) {
+                tagComboBox.getItems().add(tag.getTag());
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading tags: " + e.getMessage());
+            // Fallback to empty tag list
+            tagComboBox.getItems().add("");
+        }
+
+        tagComboBox.setPromptText("Select a tag");
+        grid.add(tagComboBox, 1, 9);
+
         getDialogPane().setContent(grid);
 
         // Add buttons
@@ -126,6 +151,7 @@ public class AddRecordDialog extends Dialog<TravelRecord> {
                 record.setNotes(notesField.getText());
                 record.setVisited(visitedCheckBox.isSelected());
                 record.setPlan(planCheckBox.isSelected());
+                record.setTag(tagComboBox.getValue());
                 return record;
             }
             return null;

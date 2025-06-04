@@ -119,7 +119,15 @@ public class App extends Application {
             }
         });
 
-        fileMenu.getItems().addAll(exportMenuItem, importMenuItem);
+        MenuItem manageTagsMenuItem = new MenuItem("Manage Tags");
+        manageTagsMenuItem.setOnAction(e -> {
+            TagsDialog tagsDialog = new TagsDialog(stage);
+            tagsDialog.showAndWait();
+            // Refresh the table data in case tags were updated
+            refreshTableData();
+        });
+
+        fileMenu.getItems().addAll(exportMenuItem, importMenuItem, new SeparatorMenuItem(), manageTagsMenuItem);
         menuBar.getMenus().add(fileMenu);
         root.setTop(menuBar);
 
@@ -203,6 +211,12 @@ public class App extends Application {
         planCol.setMinWidth(50);
         planCol.setResizable(true);
 
+        TableColumn<TravelRecord, String> tagCol = new TableColumn<>("Tag");
+        tagCol.setCellValueFactory(new PropertyValueFactory<>("tag"));
+        tagCol.setPrefWidth(80);
+        tagCol.setMinWidth(80);
+        tagCol.setResizable(true);
+
         table.getColumns().add(descCol);
         table.getColumns().add(urlCol);
         table.getColumns().add(stateCol);
@@ -212,6 +226,7 @@ public class App extends Application {
         table.getColumns().add(geoCol);
         table.getColumns().add(visitedCol);
         table.getColumns().add(planCol);
+        table.getColumns().add(tagCol);
         table.getSortOrder().add(descCol); // Default sort by description
 
         // Filter fields

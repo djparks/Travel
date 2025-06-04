@@ -20,6 +20,14 @@ public class DatabaseUpdater {
     public static void updateSchema() {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             try (Statement stmt = conn.createStatement()) {
+                // Create tags table if it doesn't exist
+                try {
+                    stmt.execute("CREATE TABLE IF NOT EXISTS tags (id BIGINT AUTO_INCREMENT PRIMARY KEY, tag VARCHAR(50) UNIQUE NOT NULL)");
+                    System.out.println("Created 'tags' table if it didn't exist");
+                } catch (SQLException e) {
+                    System.err.println("Error creating tags table: " + e.getMessage());
+                    e.printStackTrace();
+                }
                 // Add visited column if it doesn't exist
                 try {
                     stmt.execute("ALTER TABLE travel_records ADD COLUMN visited BOOLEAN DEFAULT FALSE NOT NULL");
@@ -54,6 +62,19 @@ public class DatabaseUpdater {
                     // Column might already exist, which is fine
                     if (e.getMessage().toLowerCase().contains("duplicate column name")) {
                         System.out.println("Column 'phone_number' already exists");
+                    } else {
+                        throw e;
+                    }
+                }
+
+                // Add tag column if it doesn't exist
+                try {
+                    stmt.execute("ALTER TABLE travel_records ADD COLUMN tag VARCHAR(50)");
+                    System.out.println("Added 'tag' column to travel_records table");
+                } catch (SQLException e) {
+                    // Column might already exist, which is fine
+                    if (e.getMessage().toLowerCase().contains("duplicate column name")) {
+                        System.out.println("Column 'tag' already exists");
                     } else {
                         throw e;
                     }
