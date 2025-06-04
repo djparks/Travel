@@ -47,6 +47,7 @@ public class XmlUtils {
 
         // Save pictures to separate files and update XML references
         for (TravelRecord record : records) {
+            // Handle picture 1
             byte[] picture = record.getPicture();
             if (picture != null && picture.length > 0) {
                 String pictureFileName = UUID.randomUUID().toString() + ".jpg";
@@ -57,16 +58,55 @@ public class XmlUtils {
                 record.setPictureFileName(pictureFileName);
                 record.setPicture(null); // Don't store binary data in XML
             }
+
+            // Handle picture 2
+            byte[] picture2 = record.getPicture2();
+            if (picture2 != null && picture2.length > 0) {
+                String pictureFileName2 = UUID.randomUUID().toString() + ".jpg";
+                File pictureFile2 = picturesDir.resolve(pictureFileName2).toFile();
+                try (FileOutputStream fos = new FileOutputStream(pictureFile2)) {
+                    fos.write(picture2);
+                }
+                record.setPictureFileName2(pictureFileName2);
+                record.setPicture2(null); // Don't store binary data in XML
+            }
+
+            // Handle picture 3
+            byte[] picture3 = record.getPicture3();
+            if (picture3 != null && picture3.length > 0) {
+                String pictureFileName3 = UUID.randomUUID().toString() + ".jpg";
+                File pictureFile3 = picturesDir.resolve(pictureFileName3).toFile();
+                try (FileOutputStream fos = new FileOutputStream(pictureFile3)) {
+                    fos.write(picture3);
+                }
+                record.setPictureFileName3(pictureFileName3);
+                record.setPicture3(null); // Don't store binary data in XML
+            }
         }
 
         marshaller.marshal(wrapper, file);
 
         // Restore picture data after XML export
         for (TravelRecord record : records) {
+            // Restore picture 1
             if (record.getPictureFileName() != null) {
                 File pictureFile = picturesDir.resolve(record.getPictureFileName()).toFile();
                 record.setPicture(Files.readAllBytes(pictureFile.toPath()));
                 record.setPictureFileName(null);
+            }
+
+            // Restore picture 2
+            if (record.getPictureFileName2() != null) {
+                File pictureFile2 = picturesDir.resolve(record.getPictureFileName2()).toFile();
+                record.setPicture2(Files.readAllBytes(pictureFile2.toPath()));
+                record.setPictureFileName2(null);
+            }
+
+            // Restore picture 3
+            if (record.getPictureFileName3() != null) {
+                File pictureFile3 = picturesDir.resolve(record.getPictureFileName3()).toFile();
+                record.setPicture3(Files.readAllBytes(pictureFile3.toPath()));
+                record.setPictureFileName3(null);
             }
         }
     }
@@ -75,12 +115,13 @@ public class XmlUtils {
         JAXBContext context = JAXBContext.newInstance(XmlUtils.class, TravelRecord.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
         XmlUtils wrapper = (XmlUtils) unmarshaller.unmarshal(file);
-        
+
         List<TravelRecord> importedRecords = wrapper.getRecords();
         // Load pictures from the pictures directory
         Path picturesDir = file.toPath().getParent().resolve(file.getName() + "_pictures");
         if (Files.exists(picturesDir)) {
             for (TravelRecord record : importedRecords) {
+                // Import picture 1
                 String pictureFileName = record.getPictureFileName();
                 if (pictureFileName != null) {
                     File pictureFile = picturesDir.resolve(pictureFileName).toFile();
@@ -89,11 +130,32 @@ public class XmlUtils {
                     }
                 }
                 record.setPictureFileName(null);
+
+                // Import picture 2
+                String pictureFileName2 = record.getPictureFileName2();
+                if (pictureFileName2 != null) {
+                    File pictureFile2 = picturesDir.resolve(pictureFileName2).toFile();
+                    if (pictureFile2.exists()) {
+                        record.setPicture2(Files.readAllBytes(pictureFile2.toPath()));
+                    }
+                }
+                record.setPictureFileName2(null);
+
+                // Import picture 3
+                String pictureFileName3 = record.getPictureFileName3();
+                if (pictureFileName3 != null) {
+                    File pictureFile3 = picturesDir.resolve(pictureFileName3).toFile();
+                    if (pictureFile3.exists()) {
+                        record.setPicture3(Files.readAllBytes(pictureFile3.toPath()));
+                    }
+                }
+                record.setPictureFileName3(null);
+
                 record.setId(null); // Clear ID to ensure it's saved as a new record
                 record.save();
             }
         }
-        
+
         return importedRecords;
     }
 }
