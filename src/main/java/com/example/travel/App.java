@@ -63,6 +63,7 @@ public class App extends Application {
         // Create menu bar
         MenuBar menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
+        Menu reportMenu = new Menu("Report");
 
         MenuItem exportMenuItem = new MenuItem("Export to XML");
         exportMenuItem.setOnAction(e -> {
@@ -158,8 +159,9 @@ public class App extends Application {
             }
         });
 
-        fileMenu.getItems().addAll(exportMenuItem, importMenuItem, new SeparatorMenuItem(), reportMenuItem, new SeparatorMenuItem(), manageTagsMenuItem);
-        menuBar.getMenus().add(fileMenu);
+        fileMenu.getItems().addAll(exportMenuItem, importMenuItem, new SeparatorMenuItem(), manageTagsMenuItem);
+        reportMenu.getItems().add(reportMenuItem);
+        menuBar.getMenus().addAll(fileMenu, reportMenu);
         root.setTop(menuBar);
 
         // Create TableView
@@ -236,8 +238,19 @@ public class App extends Application {
         visitedCol.setMinWidth(0);
         visitedCol.setResizable(false);
 
-        TableColumn<TravelRecord, Boolean> planCol = new TableColumn<>("Plan");
+        TableColumn<TravelRecord, Boolean> planCol = new TableColumn<>("Visit");
         planCol.setCellValueFactory(new PropertyValueFactory<>("plan"));
+        planCol.setCellFactory(column -> new TableCell<TravelRecord, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Y" : "");
+                }
+            }
+        });
         planCol.setPrefWidth(50);
         planCol.setMinWidth(50);
         planCol.setResizable(true);
