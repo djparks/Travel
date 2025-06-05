@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.xml.bind.JAXBException;
@@ -129,7 +130,35 @@ public class App extends Application {
             refreshTableData();
         });
 
-        fileMenu.getItems().addAll(exportMenuItem, importMenuItem, new SeparatorMenuItem(), manageTagsMenuItem);
+        MenuItem reportMenuItem = new MenuItem("Planned Visits Report");
+        reportMenuItem.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Planned Visits Report");
+            fileChooser.setInitialFileName("TravelPlanned.docx");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Word documents (*.docx)", "*.docx")
+            );
+            File file = fileChooser.showSaveDialog(stage);
+            if (file != null) {
+                try {
+                    WordReportGenerator.generatePlannedVisitsReport(file.getAbsolutePath());
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Report Generated");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Planned visits report has been generated successfully.");
+                    alert.showAndWait();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Report Generation Error");
+                    alert.setHeaderText("Could not generate report");
+                    alert.setContentText(ex.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
+
+        fileMenu.getItems().addAll(exportMenuItem, importMenuItem, new SeparatorMenuItem(), reportMenuItem, new SeparatorMenuItem(), manageTagsMenuItem);
         menuBar.getMenus().add(fileMenu);
         root.setTop(menuBar);
 
@@ -336,29 +365,29 @@ public class App extends Application {
             }
         });
 
-        // Report generation button
-        Button reportButton = new Button("Generate Planned Visits Report");
-        reportButton.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save Planned Visits Report");
-            fileChooser.setInitialFileName("TravelPlanned.docx");
-            fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Word documents (*.docx)", "*.docx")
-            );
-            File file = fileChooser.showSaveDialog(stage);
-            if (file != null) {
+        // Visit Toggle button
+        Button visitToggleButton = new Button("Visit Toggle");
+        visitToggleButton.setDisable(true); // Initially disabled
+
+        // Enable/disable visit toggle button based on selection
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            visitToggleButton.setDisable(newSelection == null);
+        });
+
+        visitToggleButton.setOnAction(e -> {
+            TravelRecord selectedRecord = table.getSelectionModel().getSelectedItem();
+            if (selectedRecord != null) {
+                // Toggle the plan field
+                selectedRecord.setPlan(!selectedRecord.getPlan());
+                selectedRecord.setDateUpdated(LocalDateTime.now());
                 try {
-                    WordReportGenerator.generatePlannedVisitsReport(file.getAbsolutePath());
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Report Generated");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Planned visits report has been generated successfully.");
-                    alert.showAndWait();
-                } catch (IOException ex) {
+                    selectedRecord.save();
+                    refreshTableData();
+                } catch (SQLException ex) {
                     ex.printStackTrace();
                     Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Report Generation Error");
-                    alert.setHeaderText("Could not generate report");
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Could not update record");
                     alert.setContentText(ex.getMessage());
                     alert.showAndWait();
                 }
@@ -367,7 +396,7 @@ public class App extends Application {
 
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER_LEFT);
-        buttonBox.getChildren().addAll(addButton, editButton, deleteButton, reportButton);
+        buttonBox.getChildren().addAll(addButton, editButton, deleteButton, visitToggleButton);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
 
         VBox centerBox = new VBox(10);
