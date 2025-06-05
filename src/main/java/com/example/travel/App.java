@@ -202,8 +202,8 @@ public class App extends Application {
 
         TableColumn<TravelRecord, String> stateCol = new TableColumn<>("State");
         stateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
-        stateCol.setPrefWidth(100);
-        stateCol.setMinWidth(100);
+        stateCol.setPrefWidth(60);
+        stateCol.setMinWidth(60);
         stateCol.setResizable(true);
 
         TableColumn<TravelRecord, String> cityCol = new TableColumn<>("City");
